@@ -101,13 +101,22 @@ public class UtilisateurService {
 
     // 12. Authentifier ou créer un utilisateur Google
     public Utilisateur connecterAvecGoogle(String email, String providerId, String nom, String prenom) {
+        // 1. Vérifier si l'utilisateur existe déjà
         Optional<Utilisateur> existingUser = findByEmail(email);
 
         if (existingUser.isPresent()) {
-            return existingUser.get();
+            // 2. S'il existe, on le retourne
+            Utilisateur user = existingUser.get();
+            // Mettre à jour le providerId au cas où
+            if (user.getProviderId() == null) {
+                user.setProviderId(providerId);
+                user.setProvider("GOOGLE");
+                return utilisateurRepository.save(user);
+            }
+            return user;
         }
 
-        // Créer un nouvel utilisateur
+        // 3. S'il n'existe pas, on crée un nouvel utilisateur
         Utilisateur newUser = new Utilisateur();
         newUser.setEmail(email);
         newUser.setNom(nom);
@@ -116,8 +125,9 @@ public class UtilisateurService {
         newUser.setProviderId(providerId);
         newUser.setRole(Role.CLIENT);
         newUser.setDateCreation(LocalDateTime.now());
-        newUser.setMotDePasse(null); // Pas de mot de passe pour Google
+        newUser.setMotDePasse("");  // Pas de mot de passe pour Google
 
+        // 4. Sauvegarder et retourner
         return utilisateurRepository.save(newUser);
     }
 

@@ -20,9 +20,11 @@ public class Utilisateur {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String motDePasse;
 
+    @Column(name = "photo_url", length = 500)
+    private String photoUrl;
     @Column(nullable = false)
     private String nom;
 

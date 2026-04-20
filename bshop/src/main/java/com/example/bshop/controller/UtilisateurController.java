@@ -22,33 +22,33 @@ public class UtilisateurController {
     // create user
 
     @PostMapping("/create")
-    public Utilisateur create(@RequestBody Utilisateur newuser){
+    public Utilisateur create(@RequestBody Utilisateur newuser) {
         return utilisateurService.create(newuser);
     }
 
     // read all
 
     @GetMapping("/readall")
-    public List<Utilisateur> readAll(){
+    public List<Utilisateur> readAll() {
         return utilisateurService.readAll();
     }
 
     // read
 
     @GetMapping("/read/{id}")
-    public Optional<Utilisateur> read(@PathVariable Long id){
+    public Optional<Utilisateur> read(@PathVariable Long id) {
         return utilisateurService.read(id);
     }
 
     // update
     @PutMapping("/update/{id}")
-    public Utilisateur update(@PathVariable Long id ,@RequestBody Utilisateur updateuser){
+    public Utilisateur update(@PathVariable Long id, @RequestBody Utilisateur updateuser) {
         return utilisateurService.update(id, updateuser);
     }
 
     // delete
     @DeleteMapping("/delete/{id}")
-    public void delete(@PathVariable Long id){
+    public void delete(@PathVariable Long id) {
         utilisateurService.delete(id);
     }
 
@@ -94,12 +94,10 @@ public class UtilisateurController {
 
     // 7. Connexion Google
     @PostMapping("/google-login")
-    public Utilisateur googleLogin(@RequestParam String email,
-                                   @RequestParam String providerId,
-                                   @RequestParam String nom,
-                                   @RequestParam String prenom) {
-        return utilisateurService.connecterAvecGoogle(email, providerId, nom, prenom);
+    public Utilisateur googleLogin(@RequestParam String email, @RequestParam String providerId,@RequestParam String nom , @RequestParam String prenom){
+        return utilisateurService.connecterAvecGoogle(email,providerId,nom,prenom);
     }
+
 
 // ========== STATISTIQUES ==========
 
