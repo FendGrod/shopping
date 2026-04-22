@@ -1,0 +1,147 @@
+<div class="dashboard-container">
+
+  <!-- RANGÉE DES CARTES STATISTIQUES -->
+  <div class="row g-4 mb-4">
+    <div class="col-md-3">
+      <div class="stat-card">
+        <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+          <i class="fas fa-users fa-2x"></i>
+        </div>
+        <div class="stat-info">
+          <h3>{{ stats.users | number }}</h3>
+          <p>Utilisateurs</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card">
+        <div class="stat-icon bg-success bg-opacity-10 text-success">
+          <i class="fas fa-box fa-2x"></i>
+        </div>
+        <div class="stat-info">
+          <h3>{{ stats.products | number }}</h3>
+          <p>Produits</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card">
+        <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+          <i class="fas fa-shopping-cart fa-2x"></i>
+        </div>
+        <div class="stat-info">
+          <h3>{{ stats.orders | number }}</h3>
+          <p>Commandes</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card">
+        <div class="stat-icon bg-info bg-opacity-10 text-info">
+          <i class="fas fa-chart-line fa-2x"></i>
+        </div>
+        <div class="stat-info">
+          <h3>{{ formatMoney(stats.revenue) }}</h3>
+          <p>Chiffre d'affaires</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION PRINCIPALE : GRAPHIQUE + ACTIVITÉS -->
+  <div class="row g-4 mb-4">
+    <!-- GRAPHIQUE DES VENTES (GAUCHE) -->
+    <div class="col-lg-7">
+      <div class="card-chart h-100">
+        <div class="card-header-custom">
+          <h5><i class="fas fa-chart-line me-2"></i> Évolution des ventes (7 derniers jours)</h5>
+        </div>
+        <div class="card-body">
+          <div style="height: 320px;">
+          <canvas #salesCanvas></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTIVITÉS RÉCENTES (DROITE) -->
+    <div class="col-lg-5">
+      <div class="card-activities h-100">
+        <div class="card-header-custom">
+          <h5><i class="fas fa-bell me-2"></i> Activités récentes</h5>
+          <span class="badge bg-primary">En direct</span>
+        </div>
+        <div class="card-body p-0">
+          <div class="activity-list">
+            <div *ngFor="let act of activities" class="activity-item">
+              <div class="activity-icon">
+                <i class="fas" [class.fa-user]="act.type === 'user'" [class.fa-shopping-cart]="act.type === 'order'" [class.fa-box]="act.type === 'product'"></i>
+              </div>
+              <div class="activity-content">
+                <p class="mb-0">{{ act.message }}</p>
+                <small class="text-muted">{{ act.date | date:'HH:mm' }} - {{ act.date | date:'dd/MM/yyyy' }}</small>
+              </div>
+            </div>
+            <div *ngIf="activities.length === 0" class="text-center p-4 text-muted">
+              Aucune activité récente
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECONDE RANGÉE : TOP PRODUITS / CATÉGORIES -->
+  <div class="row g-4">
+    <div class="col-md-6">
+      <div class="card-table">
+        <div class="card-header-custom">
+          <h5><i class="fas fa-crown me-2"></i> Top 5 produits les plus vendus</h5>
+        </div>
+        <div class="card-body p-0">
+          <table class="table table-hover mb-0">
+            <thead>
+              <tr><th>Produit</th><th>Ventes</th><th>Revenu</th></tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let p of topProducts">
+                <td>{{ p.name }}</td>
+                <td>{{ p.sales }}</td>
+                <td>{{ formatMoney(p.revenue) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card-table">
+        <div class="card-header-custom">
+          <h5><i class="fas fa-chart-pie me-2"></i> Répartition des ventes par catégorie</h5>
+        </div>
+        <div class="card-body">
+          <div class="category-stats">
+            <div class="category-item">
+              <span>Chaussures</span>
+              <div class="progress"><div class="progress-bar bg-primary" style="width: 45%">45%</div></div>
+            </div>
+            <div class="category-item">
+              <span>Vêtements</span>
+              <div class="progress"><div class="progress-bar bg-success" style="width: 30%">30%</div></div>
+            </div>
+            <div class="category-item">
+              <span>Accessoires</span>
+              <div class="progress"><div class="progress-bar bg-warning" style="width: 15%">15%</div></div>
+            </div>
+            <div class="category-item">
+              <span>Sport</span>
+              <div class="progress"><div class="progress-bar bg-info" style="width: 10%">10%</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

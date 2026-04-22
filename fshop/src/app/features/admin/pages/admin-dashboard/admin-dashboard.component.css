@@ -1,0 +1,254 @@
+.dashboard-container {
+  padding: 16px;
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* ========== CARTES STATISTIQUES (flottantes) – inchangées ========== */
+.stat-card,
+.card-chart,
+.card-activities,
+.card-table {
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.02);
+  transition: transform 0.2s, box-shadow 0.2s;
+  height: 100%;
+  border: none;
+}
+
+.stat-card:hover,
+.card-chart:hover,
+.card-activities:hover,
+.card-table:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 30px 45px -15px rgba(0, 0, 0, 0.25);
+}
+
+/* Cartes stats spécifiques */
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  padding: 1.5rem;
+}
+
+.stat-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(79, 70, 229, 0.1);
+}
+
+.stat-info h3 {
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin: 0;
+  color: #0f172a;
+}
+
+.stat-info p {
+  margin: 0;
+  color: #475569;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* En-tête des cartes */
+.card-header-custom {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #eef2ff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  border-radius: 24px 24px 0 0;
+}
+
+.card-header-custom h5 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+/* Activités */
+.activity-list {
+  max-height: 380px;
+  overflow-y: auto;
+}
+
+.activity-item {
+  display: flex;
+  gap: 14px;
+  padding: 14px 20px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.activity-icon {
+  width: 40px;
+  height: 40px;
+  background: #f1f5f9;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #4f46e5;
+}
+
+.activity-content p {
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-bottom: 4px;
+  color: #1e293b;
+}
+
+.activity-content small {
+  font-size: 0.7rem;
+  color: #64748b;
+}
+
+/* Tableau produits */
+.table th {
+  font-weight: 700;
+  font-size: 0.7rem;
+  color: #475569;
+  text-transform: uppercase;
+  background: #f8fafc;
+  padding: 12px 20px;
+}
+
+.table td {
+  padding: 12px 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+/* Progress bars */
+.category-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  padding: 0.5rem 0;
+}
+
+.category-item span {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.progress {
+  height: 10px;
+  border-radius: 20px;
+  background: #e2e8f0;
+}
+
+.progress-bar {
+  border-radius: 20px;
+  font-size: 0.7rem;
+  line-height: 10px;
+  padding-left: 8px;
+  text-align: left;
+  font-weight: 600;
+}
+
+/* ========== RESPONSIVE (mobile) ========== */
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 12px;
+  }
+
+  /* 2 cartes par ligne pour les stats */
+  .col-md-3 {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+
+  /* Graphique + activités : pleine largeur */
+  .col-lg-7,
+  .col-lg-5 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  /* Tables prennent toute la largeur */
+  .col-md-6 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  /* Ajustement cartes stats */
+  .stat-card {
+    flex-direction: row;
+    padding: 1rem;
+    gap: 1rem;
+  }
+  .stat-icon {
+    width: 50px;
+    height: 50px;
+  }
+  .stat-info h3 {
+    font-size: 1.4rem;
+  }
+  .stat-info p {
+    font-size: 0.75rem;
+  }
+
+  /* Réduction marges internes */
+  .card-header-custom {
+    padding: 0.8rem 1rem;
+  }
+  .activity-item {
+    padding: 10px 12px;
+    gap: 10px;
+  }
+  .activity-icon {
+    width: 34px;
+    height: 34px;
+  }
+  .activity-content p {
+    font-size: 0.75rem;
+  }
+  .table th, .table td {
+    padding: 8px 12px;
+    font-size: 0.7rem;
+  }
+  .category-item span {
+    font-size: 0.75rem;
+  }
+
+  /* Scroll horizontal pour le tableau si nécessaire */
+  .card-table {
+    overflow-x: auto;
+  }
+  .table {
+    min-width: 500px;
+  }
+}
+
+@media (max-width: 576px) {
+  /* 1 carte par ligne pour les stats */
+  .col-md-3 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+  .stat-card {
+    flex-direction: row; /* reste en ligne pour gagner de la place */
+  }
+  .stat-info h3 {
+    font-size: 1.5rem;
+  }
+}
+
+/* Canvas responsive */
+canvas {
+  width: 100% !important;
+  height: auto !important;
+  max-height: 320px;
+}

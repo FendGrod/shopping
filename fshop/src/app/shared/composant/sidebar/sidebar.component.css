@@ -1,0 +1,119 @@
+/* ========== SIDEBAR GLOBAL ========== */
+.sidebar {
+  padding: 24px 16px;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* ========== HEADER SIDEBAR ========== */
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 12px 20px 12px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #eef2f6;
+}
+
+.sidebar-header i {
+  font-size: 28px;
+  color: #4f46e5;
+}
+
+.sidebar-header span {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1f2937;
+  letter-spacing: -0.3px;
+}
+
+/* ========== SEPARATEUR ========== */
+.sidebar hr {
+  margin: 16px 12px;
+  border-color: #eef2f6;
+}
+
+/* ========== GROUP TITLE ========== */
+.group-title {
+  display: block;
+  margin: 20px 12px 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ========== LISTES ========== */
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar li {
+  margin: 4px 0;
+}
+
+/* ========== LIENS ========== */
+.sidebar a {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  
+  font-size: 15px;
+  font-weight: 500;
+  color: #4b5563;
+  text-decoration: none;
+  
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+/* Icônes */
+.sidebar a i {
+  width: 22px;
+  font-size: 18px;
+  text-align: center;
+}
+
+/* Hover */
+.sidebar a:hover {
+  background: #eef2ff;
+  color: #4f46e5;
+}
+
+/* Active */
+.sidebar a.active {
+  background: #4f46e5;
+  color: white;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25);
+}
+
+/* Texte danger (déconnexion) */
+.sidebar a.text-danger {
+  color: #ef4444;
+}
+
+.sidebar a.text-danger:hover {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 768px) {
+  .sidebar {
+    padding: 20px 12px;
+  }
+  
+  .sidebar-header span {
+    font-size: 18px;
+  }
+  
+  .sidebar a {
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+}
+

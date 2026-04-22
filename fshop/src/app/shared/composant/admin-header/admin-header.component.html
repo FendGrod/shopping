@@ -1,0 +1,22 @@
+<nav class="navbar navbar-expand-lg bg-white shadow-sm px-4">
+  <div class="container-fluid">
+    <h5 class="mb-0">
+      <i class="fas fa-{{ getMenuIcon() }} me-2"></i>
+      {{ getMenuTitle() }}
+    </h5>
+    <div class="d-flex gap-3 align-items-center">
+      <i class="fas fa-bell text-secondary" style="cursor: pointer;"></i>
+      <div class="dropdown">
+        <button class="btn btn-link text-dark text-decoration-none dropdown-toggle" data-bs-toggle="dropdown">
+          <i class="fas fa-user-circle fs-5"></i>
+          <span class="ms-1">{{ getUserName() }}</span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>Mon profil</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item text-danger" (click)="logout()" style="cursor: pointer;"><i class="fas fa-sign-out-alt me-2"></i>Déconnexion</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</nav>

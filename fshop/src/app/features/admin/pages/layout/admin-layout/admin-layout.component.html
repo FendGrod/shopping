@@ -1,0 +1,32 @@
+<div class="admin-wrapper">
+
+  <!-- Overlay pour fermer la sidebar sur mobile -->
+  <div class="sidebar-overlay" [class.show]="sidebarOpen" (click)="toggleSidebar()"></div>
+
+  <app-sidebar
+    class="sidebar"
+    [class.open]="sidebarOpen"
+    [class.hidden]="!sidebarOpen">
+  </app-sidebar>
+
+  <div class="main">
+
+    <!-- MOBILE BUTTON (hamburger) -->
+    <div class="mobile-bar">
+      <button (click)="toggleSidebar()">
+        ☰
+      </button>
+      <span class="mobile-logo" *ngIf="!sidebarOpen">
+        <i class="fas fa-store text-primary"></i> FashionShop
+      </span>
+    </div>
+
+    <app-admin-header></app-admin-header>
+
+    <div class="content">
+      <router-outlet></router-outlet>
+    </div>
+
+  </div>
+
+</div>

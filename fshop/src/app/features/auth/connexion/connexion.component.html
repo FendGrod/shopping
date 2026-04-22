@@ -1,0 +1,234 @@
+<div class="container-fluid vh-100 p-0 overflow-hidden">
+  <div class="row g-0 h-100">
+    
+    <!-- Partie gauche - Branding avec image de fond -->
+    <div class="col-lg-6 d-none d-lg-flex flex-column justify-content-center align-items-center text-white position-relative"
+         style="background-image: url('https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?q=80&w=2070&auto=format'); background-size: cover; background-position: center;">
+      
+      <!-- Overlay sombre pour lisibilité -->
+      <div class="position-absolute top-0 start-0 w-100 h-100" style="background: rgba(0, 0, 0, 0.6);"></div>
+      
+      <div class="text-center position-relative z-1">
+        <i class="fas fa-store fa-3x mb-4 text-white" style="opacity: 0.9;"></i>
+        <h1 class="display-3 fw-bold mb-3 text-white" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">FashionShop</h1>
+        <p class="lead text-white-50">La mode à portée de clic</p>
+        <div class="mt-5">
+          <i class="fas fa-shopping-bag fa-5x" style="opacity: 0.3; color: white;"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Partie droite - Formulaire (connexion ou inscription) -->
+    <div class="col-lg-6 d-flex justify-content-center align-items-center bg-light p-3 p-md-4 p-lg-5">
+      <div class="card border-0 shadow-lg rounded-4 w-100" style="max-width: 480px;">
+        
+        <!-- ========== FORMULAIRE DE CONNEXION ========== -->
+        <div *ngIf="showLogin" class="card-body p-4 p-md-5">
+          <div class="text-center mb-4">
+            <h2 class="fw-bold text-dark">Bienvenue</h2>
+            <p class="text-secondary">Connectez-vous à votre compte</p>
+          </div>
+
+          <!-- Message d'erreur -->
+          <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ errorMessage }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+
+          <form (ngSubmit)="onLoginSubmit()">
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-secondary">Email</label>
+              <div class="input-group">
+                <span class="input-group-text bg-white border-end-0 text-secondary">
+                  <i class="fas fa-envelope"></i>
+                </span>
+                <input type="email" 
+                       class="form-control bg-white border-start-0" 
+                       placeholder="exemple@email.com"
+                       [(ngModel)]="loginEmail"
+                       name="loginEmail"
+                       required>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-secondary">Mot de passe</label>
+              <div class="input-group">
+                <span class="input-group-text bg-white border-end-0 text-secondary">
+                  <i class="fas fa-lock"></i>
+                </span>
+                <input type="password" 
+                       class="form-control bg-white border-start-0" 
+                       placeholder="••••••••"
+                       [(ngModel)]="loginPassword"
+                       name="loginPassword"
+                       required>
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="remember">
+                <label class="form-check-label small text-secondary" for="remember">Se souvenir de moi</label>
+              </div>
+              <a href="#" class="text-decoration-none small" style="color: #667eea;">Mot de passe oublié ?</a>
+            </div>
+
+            <button type="submit" class="btn w-100 py-2 fw-semibold mb-3 text-white"
+                    style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">
+              Se connecter <i class="fa fa-arrow-right ms-2"></i>
+            </button>
+
+            <div class="position-relative text-center my-4">
+              <hr class="text-muted">
+              <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted small">ou</span>
+            </div>
+
+            <!-- NOUVEAU BOUTON GOOGLE -->
+            <div id="google-login-button" class="d-flex justify-content-center"></div>
+          </form>
+
+          <p class="text-center mt-4 mb-0 small text-secondary">
+            Pas encore de compte ?
+            <a href="javascript:void(0)" (click)="allerVersInscription()" class="text-decoration-none fw-semibold" style="color: #667eea;">S'inscrire</a>
+          </p>
+        </div>
+
+        <!-- ========== FORMULAIRE D'INSCRIPTION ========== -->
+        <div *ngIf="showRegister" class="card-body p-4 p-md-5">
+          <div class="text-center mb-4">
+            <h2 class="fw-bold text-dark">Inscription</h2>
+            <p class="text-secondary">Créez votre compte</p>
+          </div>
+
+          <!-- Message d'erreur -->
+          <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ errorMessage }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+
+          <!-- Message de succès -->
+          <div *ngIf="successMessage" class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ successMessage }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+
+          <form (ngSubmit)="onRegisterSubmit()">
+            <div class="row g-3">
+              <div class="col-6">
+                <label class="form-label small fw-semibold text-secondary">Prénom</label>
+                <input type="text" 
+                       class="form-control bg-white" 
+                       placeholder="Jean"
+                       [(ngModel)]="registerPrenom"
+                       name="registerPrenom"
+                       required>
+              </div>
+              <div class="col-6">
+                <label class="form-label small fw-semibold text-secondary">Nom</label>
+                <input type="text" 
+                       class="form-control bg-white" 
+                       placeholder="Dupont"
+                       [(ngModel)]="registerNom"
+                       name="registerNom"
+                       required>
+              </div>
+            </div>
+
+            <div class="mb-3 mt-3">
+              <label class="form-label small fw-semibold text-secondary">Email</label>
+              <div class="input-group">
+                <span class="input-group-text bg-white border-end-0 text-secondary">
+                  <i class="fas fa-envelope"></i>
+                </span>
+                <input type="email" 
+                       class="form-control bg-white border-start-0" 
+                       placeholder="exemple@email.com"
+                       [(ngModel)]="registerEmail"
+                       name="registerEmail"
+                       required>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-secondary">Téléphone (optionnel)</label>
+              <div class="input-group">
+                <span class="input-group-text bg-white border-end-0 text-secondary">
+                  <i class="fas fa-phone"></i>
+                </span>
+                <input type="tel" 
+                       class="form-control bg-white border-start-0" 
+                       placeholder="77 123 45 67"
+                       [(ngModel)]="registerTelephone"
+                       name="registerTelephone">
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-secondary">Adresse (optionnel)</label>
+              <div class="input-group">
+                <span class="input-group-text bg-white border-end-0 text-secondary">
+                  <i class="fas fa-map-marker-alt"></i>
+                </span>
+                <input type="text" 
+                       class="form-control bg-white border-start-0" 
+                       placeholder="Dakar, Sénégal"
+                       [(ngModel)]="registerAdresse"
+                       name="registerAdresse">
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-secondary">Mot de passe</label>
+              <div class="input-group">
+                <span class="input-group-text bg-white border-end-0 text-secondary">
+                  <i class="fas fa-lock"></i>
+                </span>
+                <input type="password" 
+                       class="form-control bg-white border-start-0" 
+                       placeholder="••••••••"
+                       [(ngModel)]="registerPassword"
+                       name="registerPassword"
+                       required>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label small fw-semibold text-secondary">Confirmer mot de passe</label>
+              <div class="input-group">
+                <span class="input-group-text bg-white border-end-0 text-secondary">
+                  <i class="fas fa-lock"></i>
+                </span>
+                <input type="password" 
+                       class="form-control bg-white border-start-0" 
+                       placeholder="••••••••"
+                       [(ngModel)]="registerConfirmPassword"
+                       name="registerConfirmPassword"
+                       required>
+              </div>
+            </div>
+
+            <button type="submit" class="btn w-100 py-2 fw-semibold mb-3 text-white"
+                    style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">
+              S'inscrire <i class="fas fa-arrow-right ms-2"></i>
+            </button>
+
+            <div class="position-relative text-center my-4">
+              <hr class="text-muted">
+              <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted small">ou</span>
+            </div>
+
+            <!-- NOUVEAU BOUTON GOOGLE POUR INSCRIPTION -->
+            <div id="google-login-button-register" class="d-flex justify-content-center"></div>
+          </form>
+
+          <p class="text-center mt-4 mb-0 small text-secondary">
+            Déjà un compte ?
+            <a href="javascript:void(0)" (click)="allerVersConnexion()" class="text-decoration-none fw-semibold" style="color: #667eea;">Se connecter</a>
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
