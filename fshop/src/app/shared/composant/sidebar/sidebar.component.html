@@ -7,75 +7,52 @@
 
   <hr>
 
-  <div *ngFor="let group of menus">
+  <!-- Menu principal (visible par tous les admins) -->
+  <!-- Menu principal (visible par tous les admins) -->
+<div *ngFor="let group of menus">
+  <small class="group-title">{{ group.group }}</small>
+  <ul>
+    <li *ngFor="let item of group.items">
+      <a [routerLink]="'/admin/' + item.key"
+         routerLinkActive="active"
+         (click)="setActiveMenu(item.key)">
+        <i class="fas fa-{{item.icon}}"></i>
+        <span>{{ item.label }}</span>
+      </a>
+    </li>
+  </ul>
+</div>
 
-    <small class="group-title">{{ group.group }}</small>
-
-    <ul>
-
-      <li *ngFor="let item of group.items">
-
-        <a (click)="setActiveMenu(item.key)"
-           [class.active]="activeMenu === item.key">
-
-          <i class="fas fa-{{item.icon}}"></i>
-          <span>{{ item.label }}</span>
-
-        </a>
-
-      </li>
-
-    </ul>
-
-  </div>
-
-  <div *ngIf="isSuperAdmin">
-
-    <small class="group-title">ADMIN</small>
-
-    <ul>
-
-      <li *ngFor="let item of superAdminMenu[0].items">
-
-        <a (click)="setActiveMenu(item.key)"
-           [class.active]="activeMenu === item.key">
-
-          <i class="fas fa-{{item.icon}}"></i>
-          <span>{{ item.label }}</span>
-
-        </a>
-
-      </li>
-
-    </ul>
-
-  </div>
+<!-- Menu réservé au SUPER_ADMIN -->
+<div *ngIf="isSuperAdmin">
+  <small class="group-title">Super Admin</small>
+  <ul>
+    <li *ngFor="let item of superAdminMenu[0].items">
+      <a [routerLink]="'/admin/' + item.key"
+         routerLinkActive="active"
+         (click)="setActiveMenu(item.key)">
+        <i class="fas fa-{{item.icon}}"></i>
+        <span>{{ item.label }}</span>
+      </a>
+    </li>
+  </ul>
+</div>
 
   <hr>
 
   <ul>
-
     <li>
       <a routerLink="/accueil">
         <i class="fas fa-globe"></i>
         <span>Voir le site</span>
       </a>
     </li>
-
     <li>
-      <a>
-        <i class="fas fa-cog"></i>
-        <span>Paramètres</span>
-      </a>
-    </li>
-
-    <li>
-      <a class="text-danger" (click)="logout()">
+      <a (click)="logout()" style="cursor: pointer;">
         <i class="fas fa-sign-out-alt"></i>
         <span>Déconnexion</span>
       </a>
     </li>
-
   </ul>
 
 </div>

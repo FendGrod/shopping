@@ -8,7 +8,10 @@ import { Role } from '../model/utilisateur';
 // import { AdminGuard } from './guards/admin.guard';
 import { AdminLayoutComponent } from './features/admin/pages/layout/admin-layout/admin-layout.component';
 import { AdminDashboardComponent } from './features/admin/pages/admin-dashboard/admin-dashboard.component';
-// import { AdminUsersComponent } from './pages/admin-users/admin-users.component';
+import { AdminUsersComponent } from './features/admin/pages/admin-users/admin-users.component';
+import { AdminClientsComponent } from './features/admin/pages/admin-clients/admin-clients.component';
+import { AdminProduitsComponent } from './features/admin/pages/admin-produits/admin-produits.component';
+
 // import { AdminProductsComponent } from './pages/admin-products/admin-products.component';
 // import { AdminOrdersComponent } from './pages/admin-orders/admin-orders.component';
 // import { AdminCategoriesComponent } from './pages/admin-categories/admin-categories.component';
@@ -36,14 +39,15 @@ export const routes: Routes = [
     path: "admin", 
     component: AdminLayoutComponent, 
     canActivate: [AuthGuard, RoleGuard],
-    data: { role: Role.SUPER_ADMIN },  // ← Ici on passe le rôle requis
+    data: { role: Role.ADMIN}, 
+     // ← Ici on passe le rôle requis
     children: [
       { path: "", redirectTo: "dashboard", pathMatch: "full" },
       { path: "dashboard", component: AdminDashboardComponent },
-    //   { path: "users", component: AdminUsersComponent },
-    //   { path: "products", component: AdminProductsComponent },
-    //   { path: "orders", component: AdminOrdersComponent },
-    //   { path: "categories", component: AdminCategoriesComponent },
+      { path: "admins", component: AdminUsersComponent },
+      { path : "clients",component:AdminClientsComponent},
+      { path : "products",component:AdminProduitsComponent}
+   
     ]
   },
   

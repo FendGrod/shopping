@@ -26,9 +26,10 @@ export class AuthService {
           if (isValid) {
             this.utilisateurService.findByEmail(email).subscribe({
               next: (user: Utilisateur) => {
-                this.currentUser = user;
-                localStorage.setItem('currentUser', JSON.stringify(user));
-                resolve(true);
+               this.currentUser = user;
+               localStorage.setItem('currentUser', JSON.stringify(user)); // ← cette ligne est essentielle
+               resolve(true);
+
               },
               error: (err: Error) => {
                 console.error(err);

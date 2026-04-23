@@ -1,0 +1,108 @@
+<div class="users-container">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4><i class="fas fa-users"></i> Gestion des clients</h4>
+    <span class="badge bg-secondary fs-6">Total : {{ getTotalClients() }}</span>
+  </div>
+  <p class="text-muted mb-4">
+    Les clients s’inscrivent eux‑mêmes via la page d’accueil. 
+  </p>
+
+  <!-- Filtres -->
+  <div class="filters-bar">
+    <div class="row g-3 align-items-end">
+      <div class="col-md-4">
+        <label class="form-label">Nom / Prénom</label>
+        <input type="text" class="form-control" placeholder="Rechercher..." [(ngModel)]="searchNom" (input)="applyFilters()">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Email</label>
+        <input type="text" class="form-control" placeholder="Email..." [(ngModel)]="searchEmail" (input)="applyFilters()">
+      </div>
+      <div class="col-md-4">
+        <button class="btn btn-outline-secondary w-100" (click)="resetFilters()">
+          <i class="fas fa-undo-alt"></i> Réinitialiser
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tableau -->
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nom complet</th>
+          <th>Email</th>
+          <th>Téléphone</th>
+          <th>Adresse</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let client of filteredClients">
+          <td>{{ client.id }}</td>
+          <td>{{ client.prenom }} {{ client.nom }}</td>
+          <td>{{ client.email }}</td>
+          <td>{{ client.telephone || '-' }}</td>
+          <td>{{ client.adresse || '-' }}</td>
+          <td>
+            <button class="btn btn-sm btn-outline-primary me-1" (click)="openEditModal(client)">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-danger" (click)="deleteClient(client.id!)">
+              <i class="fas fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="filteredClients.length === 0">
+          <td colspan="6" class="text-center">Aucun client trouvé</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- MODAL MODIFICATION CLIENT -->
+<div class="modal fade" id="clientModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ modalTitle }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form #clientForm="ngForm">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Prénom</label>
+              <input type="text" class="form-control" [(ngModel)]="currentClient.prenom" name="prenom" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Nom</label>
+              <input type="text" class="form-control" [(ngModel)]="currentClient.nom" name="nom" required>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-control" [(ngModel)]="currentClient.email" name="email" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Téléphone</label>
+            <input type="text" class="form-control" [(ngModel)]="currentClient.telephone" name="telephone">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Adresse</label>
+            <textarea class="form-control" rows="2" [(ngModel)]="currentClient.adresse" name="adresse"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+        <button type="button" class="btn btn-primary" (click)="saveClient()" [disabled]="clientForm.invalid">
+          Enregistrer
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

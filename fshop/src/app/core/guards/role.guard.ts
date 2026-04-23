@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/router';
 import { AuthService } from '../../../service/auth.service';
 import { Role } from '../../../model/utilisateur';
 
@@ -12,17 +12,21 @@ export class RoleGuard {
     private router: Router
   ) {}
 
-  canActivate(role: Role): boolean {
+  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
     const currentUser = this.authService.getCurrentUser();
-    
-    if (currentUser && currentUser.role === role) {
-      return true;
-    } else if (currentUser && currentUser.role === Role.SUPER_ADMIN) {
-      // Super Admin a accès à tout
-      return true;
-    } else {
-      this.router.navigate(['/accueil']);
+    const requiredRole = route.data['role'] as Role; // ← Récupère le rôle depuis les données de la route
+
+    if (!currentUser) {
+      this.router.navigate(['/connexion']);
       return false;
     }
+
+    // Vérifie si l'utilisateur a le rôle requis ou est SUPER_ADMIN
+    if (currentUser.role === requiredRole || currentUser.role === Role.SUPER_ADMIN) {
+      return true;
+    }
+
+    this.router.navigate(['/accueil']);
+    return false;
   }
 }

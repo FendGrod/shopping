@@ -1,0 +1,130 @@
+<div class="users-container">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4><i class="fas fa-user-shield"></i> Gestion des administrateurs</h4>
+    <div>
+      <!-- Badges séparés -->
+      <span class="badge bg-primary fs-6 me-2">Admins : {{ getTotalAdmins() }}</span>
+      <span class="badge bg-danger fs-6 me-2">Super Admins : {{ getTotalSuperAdmins() }}</span>
+      <button class="btn btn-primary" (click)="openAddModal()">
+        <i class="fas fa-plus"></i> Ajouter un administrateur
+      </button>
+    </div>
+  </div>
+  <p class="text-muted mb-4">
+    Seul un Super Admin peut ajouter ou modifier d’autres administrateurs.<br>
+    
+  </p>
+
+  <!-- Filtres -->
+  <div class="filters-bar">
+    <div class="row g-3 align-items-end">
+      <div class="col-md-3">
+        <label class="form-label">Nom / Prénom</label>
+        <input type="text" class="form-control" placeholder="Rechercher..." [(ngModel)]="searchNom" (input)="applyFilters()">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Email</label>
+        <input type="text" class="form-control" placeholder="Email..." [(ngModel)]="searchEmail" (input)="applyFilters()">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Rôle</label>
+        <select class="form-select" [(ngModel)]="searchRole" (change)="applyFilters()">
+          <option value="">Tous</option>
+          <option *ngFor="let r of allRoles" [value]="r">{{ r }}</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <button class="btn btn-outline-secondary w-100" (click)="resetFilters()">
+          <i class="fas fa-undo-alt"></i> Réinitialiser
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tableau -->
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nom complet</th>
+          <th>Email</th>
+          <th>Rôle</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let admin of filteredAdmins">
+          <td>{{ admin.id }}</td>
+          <td>{{ admin.prenom }} {{ admin.nom }}</td>
+          <td>{{ admin.email }}</td>
+          <td>
+            <span class="badge" [ngClass]="{'bg-danger': admin.role === 'SUPER_ADMIN', 'bg-primary': admin.role === 'ADMIN'}">
+              {{ admin.role }}
+            </span>
+          </td>
+          <td>
+            <button class="btn btn-sm btn-outline-primary me-1" (click)="openEditModal(admin)">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-danger" (click)="deleteAdmin(admin.id!)">
+              <i class="fas fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="filteredAdmins.length === 0">
+          <td colspan="5" class="text-center">Aucun administrateur trouvé</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- MODAL AJOUT / MODIFICATION ADMIN -->
+<div class="modal fade" id="adminModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ modalTitle }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form #adminForm="ngForm">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Prénom *</label>
+              <input type="text" class="form-control" [(ngModel)]="currentAdmin.prenom" name="prenom" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Nom *</label>
+              <input type="text" class="form-control" [(ngModel)]="currentAdmin.nom" name="nom" required>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Email *</label>
+            <input type="email" class="form-control" [(ngModel)]="currentAdmin.email" name="email" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Mot de passe *</label>
+            <input type="password" class="form-control" [(ngModel)]="currentAdmin.motDePasse" name="motDePasse" [required]="!isEditMode">
+            <small *ngIf="isEditMode" class="text-muted">Laissez vide pour ne pas changer</small>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Rôle *</label>
+            <select class="form-select" [(ngModel)]="currentAdmin.role" name="role"
+                    [disabled]="isEditMode && currentAdmin.id === currentUserId">
+              <option *ngFor="let r of availableRoles" [value]="r">{{ r }}</option>
+            </select>
+            <small *ngIf="isEditMode && currentAdmin.id === currentUserId" class="text-muted">Vous ne pouvez pas modifier votre propre rôle.</small>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+        <button type="button" class="btn btn-primary" (click)="saveAdmin()" [disabled]="adminForm.invalid">
+          {{ isEditMode ? 'Mettre à jour' : 'Créer' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -35,30 +35,31 @@ export class SidebarComponent implements OnInit {
     this.authService.logout();
   }
 
-  menus = [
-    {
-      group: 'Principal',
-      items: [
-        { label: 'Dashboard', icon: 'tachometer-alt', key: 'dashboard' }
-      ]
-    },
-    {
-      group: 'Gestion',
-      items: [
-        { label: 'Utilisateurs', icon: 'users', key: 'users' },
-        { label: 'Produits', icon: 'box', key: 'products' },
-        { label: 'Catégories', icon: 'tags', key: 'categories' },
-        { label: 'Commandes', icon: 'shopping-cart', key: 'orders' }
-      ]
-    }
-  ];
+  // Menus accessibles à tous les administrateurs (ADMIN et SUPER_ADMIN)
+ menus = [
+  {
+    group: 'Principal',
+    items: [
+      { label: 'Dashboard', icon: 'tachometer-alt', key: 'dashboard' }
+    ]
+  },
+  {
+    group: 'Gestion',
+    items: [
+      { label: 'Clients', icon: 'users', key: 'clients' },   // ← renommé
+      { label: 'Produits', icon: 'box', key: 'products' },
+      { label: 'Catégories', icon: 'tags', key: 'categories' },
+      { label: 'Commandes', icon: 'shopping-cart', key: 'orders' }
+    ]
+  }
+];
 
-  superAdminMenu = [
-    {
-      group: 'Administration',
-      items: [
-        { label: 'Admins', icon: 'user-shield', key: 'admins' }
-      ]
-    }
-  ];
+superAdminMenu = [
+  {
+    group: 'Super Admin',
+    items: [
+      { label: 'Administrateurs', icon: 'user-shield', key: 'admins' }
+    ]
+  }
+];
 }

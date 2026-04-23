@@ -89,59 +89,63 @@ export class ConnexionComponent implements OnInit {
   }
 
   // ⭐ MODIFICATION ICI : Redirige vers la bonne page selon le rôle ⭐
-  handleGoogleLogin(response: any) {
-    console.log('Réponse Google reçue');
-    
-    const payload = this.decodeJwt(response.credential);
-    console.log('Infos utilisateur:', payload);
-    
-    // Envoyer au backend Spring Boot
-    this.utilisateurService.googleLogin(
-  payload.email,
-  payload.sub,
-  payload.family_name || '',
-  payload.given_name || ''
-).subscribe({
-  next: (data) => {
-    console.log('Backend réponse:', data);
+handleGoogleLogin(response: any) {
+  console.log('Réponse Google reçue');
+  const payload = this.decodeJwt(response.credential);
+  console.log('Infos utilisateur:', payload);
 
-    localStorage.setItem('currentUser', JSON.stringify(data));
-
-    if (data.role === 'ADMIN' || data.role === 'SUPER_ADMIN') {
-      this.router.navigate(['/admin']);
-    } else {
-      this.router.navigate(['/accueil']);
-    }
-  },
-  error: (err) => {
-    console.error('Erreur:', err);
-    this.errorMessage = 'Erreur de connexion avec Google';
-  }
-});
-  }
-
-  decodeJwt(token: string): any {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    return JSON.parse(atob(base64));
-  }
-
-  // ⭐ MODIFICATION ICI : Redirige selon le rôle ⭐
-  onLoginSubmit() {
-    this.authService.login(this.loginEmail, this.loginPassword).then((success) => {
-      if (success) {
-        const user = this.authService.getCurrentUser();
-        // Redirection selon le rôle
-        if (user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN') {
-          this.router.navigate(['/admin']);
-        } else {
-          this.router.navigate(['/accueil']);
-        }
+  this.utilisateurService.googleLogin(
+    payload.email,
+    payload.sub,
+    payload.family_name || '',
+    payload.given_name || ''
+  ).subscribe({
+    next: (data) => {
+      console.log('Backend réponse (data):', data);
+      console.log('Rôle reçu du backend:', data.role);
+      localStorage.setItem('currentUser', JSON.stringify(data));
+      const role = data.role?.toUpperCase();
+      if (role === 'ADMIN' || role === 'SUPER_ADMIN') {
+        console.log('Google : redirection /admin');
+        this.router.navigate(['/admin']);
       } else {
-        this.errorMessage = 'Email ou mot de passe incorrect';
+        console.log('Google : redirection /accueil');
+        this.router.navigate(['/accueil']);
       }
-    });
-  }
+    },
+    error: (err) => {
+      console.error('Erreur:', err);
+      this.errorMessage = 'Erreur de connexion avec Google';
+    }
+  });
+}
+// Décoder le token JWT (utilisé pour Google)
+private decodeJwt(token: string): any {
+  const base64Url = token.split('.')[1];
+  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+  return JSON.parse(atob(base64));
+}
+
+onLoginSubmit() {
+  this.authService.login(this.loginEmail, this.loginPassword).then((success) => {
+    if (success) {
+      const stored = localStorage.getItem('currentUser');
+      console.log('=== VÉRIFICATION APRÈS CONNEXION ===');
+      console.log('localStorage currentUser:', stored);
+      const user = JSON.parse(stored || '{}');
+      console.log('Rôle trouvé:', user.role);
+      if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') {
+        console.log('Redirection vers /admin');
+        this.router.navigate(['/admin']);
+      } else {
+        console.log('Redirection vers /accueil');
+        this.router.navigate(['/accueil']);
+      }
+    } else {
+      this.errorMessage = 'Email ou mot de passe incorrect';
+    }
+  });
+}
 
   onRegisterSubmit() {
     if (this.registerPassword !== this.registerConfirmPassword) {

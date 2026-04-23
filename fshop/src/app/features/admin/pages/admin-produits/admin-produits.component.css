@@ -1,0 +1,23 @@
+.produits-container {
+  padding: 0;
+}
+
+.filters-bar {
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 16px;
+  margin-bottom: 24px;
+}
+
+.table th, .table td {
+  vertical-align: middle;
+}
+
+.badge {
+  font-size: 0.75rem;
+  padding: 5px 10px;
+}
+
+img {
+  object-fit: cover;
+}

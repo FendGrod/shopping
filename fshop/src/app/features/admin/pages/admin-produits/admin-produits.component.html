@@ -1,0 +1,173 @@
+<div class="produits-container">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4><i class="fas fa-box"></i> Gestion des produits</h4>
+    <div>
+
+          <button class="btn btn-success me-2" (click)="fileInput.click()">
+        <i class="fas fa-file-excel"></i> Importer Excel
+      </button>
+      <input type="file" #fileInput accept=".xlsx, .xls" style="display: none" (change)="importExcel($event)">
+      
+      <!-- Bouton Télécharger Template -->
+      <button class="btn btn-outline-info me-2" (click)="downloadTemplate()">
+        <i class="fas fa-download"></i> Template Excel
+      </button>
+      <span class="badge bg-secondary fs-6 me-2">Total : {{ getTotalProduits() }}</span>
+      <button class="btn btn-primary" (click)="openAddModal()">
+        <i class="fas fa-plus"></i> Ajouter un produit
+      </button>
+    </div>
+  </div>
+  <p class="text-muted mb-4">
+    Gérez ici tous vos produits. Vous pouvez ajouter, modifier ou supprimer un produit.
+  </p>
+
+  <!-- Filtres -->
+  <div class="filters-bar">
+    <div class="row g-3 align-items-end">
+      <div class="col-md-3">
+        <label class="form-label">Nom du produit</label>
+        <input type="text" class="form-control" placeholder="Rechercher..." [(ngModel)]="searchNom" (input)="applyFilters()">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Catégorie</label>
+        <select class="form-select" [(ngModel)]="searchCategorie" (change)="applyFilters()">
+          <option value="">Toutes</option>
+          <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Genre</label>
+        <select class="form-select" [(ngModel)]="searchGenre" (change)="applyFilters()">
+          <option value="">Tous</option>
+          <option *ngFor="let g of genres" [value]="g">{{ g }}</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <button class="btn btn-outline-secondary w-100" (click)="resetFilters()">
+          <i class="fas fa-undo-alt"></i> Réinitialiser
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tableau des produits -->
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Image</th>
+          <th>Nom</th>
+          <th>Catégorie</th>
+          <th>Genre</th>
+          <th>Prix</th>
+          <th>Stock</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let produit of filteredProduits">
+          <td>{{ produit.id }}</td>
+          <td>
+        <img [src]="produit.imageUrl || 'https://via.placeholder.com/50x50?text=No+Image'" 
+            style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;"
+            (error)="produit.imageUrl = 'https://via.placeholder.com/50x50?text=No+Image'">
+        </td>
+          <td>{{ produit.nom }}</td>
+          <td>{{ produit.categorie }}</td>
+          <td>{{ produit.genre }}</td>
+          <td>{{ produit.prix | number }} FCFA</td>
+          <td>
+            <span [class.text-danger]="produit.stock < 5" [class.text-success]="produit.stock >= 5">
+              {{ produit.stock }}
+            </span>
+           </td>
+          <td>
+            <button class="btn btn-sm btn-outline-primary me-1" (click)="openEditModal(produit)">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-danger" (click)="deleteProduit(produit.id!)">
+              <i class="fas fa-trash"></i>
+            </button>
+           </td>
+         </tr>
+        <tr *ngIf="filteredProduits.length === 0">
+          <td colspan="8" class="text-center">Aucun produit trouvé</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- MODAL AJOUT / MODIFICATION PRODUIT -->
+<div class="modal fade" id="produitModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ modalTitle }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form #produitForm="ngForm">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Nom *</label>
+              <input type="text" class="form-control" [(ngModel)]="currentProduit.nom" name="nom" required>
+            </div>
+                <div class="mb-3">
+        <label class="form-label">Image du produit</label>
+        <input type="file" class="form-control" (change)="onFileSelected($event)" accept="image/*">
+        
+        <!-- Aperçu de l'image -->
+        <div *ngIf="currentProduit.imageUrl" class="mt-2">
+            <img [src]="currentProduit.imageUrl" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;">
+            <button type="button" class="btn btn-sm btn-danger ms-2" (click)="removeImage()">
+            <i class="fas fa-trash"></i> Supprimer
+            </button>
+        </div>
+        </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea class="form-control" rows="3" [(ngModel)]="currentProduit.description" name="description"></textarea>
+          </div>
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Catégorie *</label>
+              <select class="form-select" [(ngModel)]="currentProduit.categorie" name="categorie" required>
+                <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+              </select>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Sous-catégorie</label>
+              <input type="text" class="form-control" [(ngModel)]="currentProduit.sousCategorie" name="sousCategorie" placeholder="Ex: Homme, Femme, Sport">
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Genre *</label>
+              <select class="form-select" [(ngModel)]="currentProduit.genre" name="genre" required>
+                <option *ngFor="let g of genres" [value]="g">{{ g }}</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Prix (FCFA) *</label>
+              <input type="number" class="form-control" [(ngModel)]="currentProduit.prix" name="prix" required min="0">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Stock *</label>
+              <input type="number" class="form-control" [(ngModel)]="currentProduit.stock" name="stock" required min="0">
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+        <button type="button" class="btn btn-primary" (click)="saveProduit()" [disabled]="produitForm.invalid">
+          {{ isEditMode ? 'Mettre à jour' : 'Créer' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
