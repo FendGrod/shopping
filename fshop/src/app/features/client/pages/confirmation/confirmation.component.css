@@ -1,0 +1,10 @@
+.confirmation-page {
+  padding-top: 76px;
+  min-height: 100vh;
+  background: #f8fafc;
+}
+
+.card {
+  max-width: 600px;
+  margin: 0 auto;
+}

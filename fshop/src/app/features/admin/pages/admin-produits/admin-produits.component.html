@@ -1,31 +1,27 @@
 <div class="produits-container">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h4><i class="fas fa-box"></i> Gestion des produits</h4>
-    <div>
 
-          <button class="btn btn-success me-2" (click)="fileInput.click()">
+  <!-- En-tête -->
+  <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <h4><i class="fas fa-box"></i> Gestion des produits</h4>
+    <div class="d-flex gap-2 flex-wrap">
+      <button class="btn btn-success" (click)="fileInput.click()">
         <i class="fas fa-file-excel"></i> Importer Excel
       </button>
-      <input type="file" #fileInput accept=".xlsx, .xls" style="display: none" (change)="importExcel($event)">
-      
-      <!-- Bouton Télécharger Template -->
-      <button class="btn btn-outline-info me-2" (click)="downloadTemplate()">
-        <i class="fas fa-download"></i> Template Excel
+      <input type="file" #fileInput accept=".xlsx, .xls, .csv" style="display: none" (change)="importExcel($event)">
+      <button class="btn btn-outline-info" (click)="resetFilters()">
+        <i class="fas fa-undo-alt"></i> Réinitialiser
       </button>
-      <span class="badge bg-secondary fs-6 me-2">Total : {{ getTotalProduits() }}</span>
+      <span class="badge bg-secondary fs-6 align-self-center">Total : {{ getTotalProduits() }}</span>
       <button class="btn btn-primary" (click)="openAddModal()">
-        <i class="fas fa-plus"></i> Ajouter un produit
+        <i class="fas fa-plus"></i> Ajouter
       </button>
     </div>
   </div>
-  <p class="text-muted mb-4">
-    Gérez ici tous vos produits. Vous pouvez ajouter, modifier ou supprimer un produit.
-  </p>
 
   <!-- Filtres -->
   <div class="filters-bar">
     <div class="row g-3 align-items-end">
-      <div class="col-md-3">
+      <div class="col-md-4">
         <label class="form-label">Nom du produit</label>
         <input type="text" class="form-control" placeholder="Rechercher..." [(ngModel)]="searchNom" (input)="applyFilters()">
       </div>
@@ -43,12 +39,19 @@
           <option *ngFor="let g of genres" [value]="g">{{ g }}</option>
         </select>
       </div>
-      <div class="col-md-3">
+      <div class="col-md-2">
         <button class="btn btn-outline-secondary w-100" (click)="resetFilters()">
-          <i class="fas fa-undo-alt"></i> Réinitialiser
+          <i class="fas fa-undo-alt"></i> Reset
         </button>
       </div>
     </div>
+  </div>
+
+  <!-- Bouton suppression multiple -->
+  <div class="mb-3" *ngIf="selectedProduits.length > 0">
+    <button class="btn btn-danger" (click)="deleteSelected()">
+      <i class="fas fa-trash-alt"></i> Supprimer {{ selectedProduits.length }} produit(s)
+    </button>
   </div>
 
   <!-- Tableau des produits -->
@@ -56,51 +59,66 @@
     <table class="table table-hover">
       <thead>
         <tr>
+          <th width="40"><input type="checkbox" [(ngModel)]="selectAll" (change)="toggleSelectAll()"></th>
           <th>ID</th>
           <th>Image</th>
           <th>Nom</th>
           <th>Catégorie</th>
-          <th>Genre</th>
           <th>Prix</th>
           <th>Stock</th>
-          <th>Actions</th>
+          <th>Statut</th>
+          <th width="120">Actions</th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let produit of filteredProduits">
+          <td><input type="checkbox" [checked]="selectedProduits.includes(produit.id!)" (change)="toggleSelection(produit.id!)"></td>
           <td>{{ produit.id }}</td>
           <td>
-        <img [src]="produit.imageUrl || 'https://via.placeholder.com/50x50?text=No+Image'" 
-            style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;"
-            (error)="produit.imageUrl = 'https://via.placeholder.com/50x50?text=No+Image'">
-        </td>
-          <td>{{ produit.nom }}</td>
-          <td>{{ produit.categorie }}</td>
-          <td>{{ produit.genre }}</td>
-          <td>{{ produit.prix | number }} FCFA</td>
-          <td>
-            <span [class.text-danger]="produit.stock < 5" [class.text-success]="produit.stock >= 5">
-              {{ produit.stock }}
-            </span>
-           </td>
-          <td>
-            <button class="btn btn-sm btn-outline-primary me-1" (click)="openEditModal(produit)">
-              <i class="fas fa-edit"></i>
-            </button>
-            <button class="btn btn-sm btn-outline-danger" (click)="deleteProduit(produit.id!)">
-              <i class="fas fa-trash"></i>
-            </button>
-           </td>
-         </tr>
+            <img [src]="produit.imageUrl || 'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2750%27 height=%2750%27 viewBox=%270 0 50 50%27%3E%3Crect width=%2750%27 height=%2750%27 fill=%27%23cccccc%27/%3E%3Ctext x=%2750%25%27 y=%2750%25%27 text-anchor=%27middle%27 dy=%27.3em%27 fill=%27%23666666%27 font-size=%2710%27%3EPas d%27image%3C/text%3E%3C/svg%3E'" 
+                 style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
+            </td>
+            <td>
+              <strong>{{ produit.nom }}</strong>
+              <div class="small text-muted" *ngIf="produit.tailles?.length">Tailles: {{ produit.tailles?.join(', ') }}</div>
+            </td>
+            <td>{{ produit.categorie }}</td>
+            <td>
+              <span *ngIf="produit.isPromo" class="text-decoration-line-through text-muted me-1">{{ produit.prixOriginal | number }} F</span>
+              <span class="fw-bold text-primary">{{ produit.prix | number }} F</span>
+              <span *ngIf="getRemise(produit) > 0" class="badge bg-danger ms-1">-{{ getRemise(produit) }}%</span>
+            </td>
+            <td>
+              <span [class.text-danger]="produit.stock < 5" [class.text-success]="produit.stock >= 5">
+                {{ produit.stock }}
+              </span>
+            </td>
+            <td>
+              <span *ngIf="produit.isNew" class="badge bg-success me-1">Nouveau</span>
+              <span *ngIf="produit.isPromo" class="badge bg-danger">Promo</span>
+              <span *ngIf="produit.rating" class="badge bg-warning ms-1">{{ produit.rating }} ★</span>
+            </td>
+            <td>
+              <button class="btn btn-sm btn-outline-info me-1" (click)="openDetailModal(produit)" title="Détails">
+                <i class="fas fa-eye"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-primary me-1" (click)="openEditModal(produit)" title="Modifier">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-danger" (click)="deleteProduit(produit.id!)" title="Supprimer">
+                <i class="fas fa-trash"></i>
+              </button>
+            </td>
+          </tr>
         <tr *ngIf="filteredProduits.length === 0">
-          <td colspan="8" class="text-center">Aucun produit trouvé</td>
+          <td colspan="9" class="text-center">Aucun produit trouvé</td>
         </tr>
       </tbody>
     </table>
   </div>
 </div>
 
-<!-- MODAL AJOUT / MODIFICATION PRODUIT -->
+<!-- MODAL AJOUT / MODIFICATION -->
 <div class="modal fade" id="produitModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
@@ -111,26 +129,28 @@
       <div class="modal-body">
         <form #produitForm="ngForm">
           <div class="row">
-            <div class="col-md-6 mb-3">
+            <div class="col-md-8 mb-3">
               <label class="form-label">Nom *</label>
               <input type="text" class="form-control" [(ngModel)]="currentProduit.nom" name="nom" required>
             </div>
-                <div class="mb-3">
-        <label class="form-label">Image du produit</label>
-        <input type="file" class="form-control" (change)="onFileSelected($event)" accept="image/*">
-        
-        <!-- Aperçu de l'image -->
-        <div *ngIf="currentProduit.imageUrl" class="mt-2">
-            <img [src]="currentProduit.imageUrl" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;">
-            <button type="button" class="btn btn-sm btn-danger ms-2" (click)="removeImage()">
-            <i class="fas fa-trash"></i> Supprimer
-            </button>
-        </div>
-        </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Stock *</label>
+              <input type="number" class="form-control" [(ngModel)]="currentProduit.stock" name="stock" required min="0">
+            </div>
           </div>
           <div class="mb-3">
             <label class="form-label">Description</label>
-            <textarea class="form-control" rows="3" [(ngModel)]="currentProduit.description" name="description"></textarea>
+            <textarea class="form-control" rows="2" [(ngModel)]="currentProduit.description" name="description"></textarea>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Prix (FCFA) *</label>
+              <input type="number" class="form-control" [(ngModel)]="currentProduit.prix" name="prix" required min="0">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Prix original (optionnel)</label>
+              <input type="number" class="form-control" [(ngModel)]="currentProduit.prixOriginal" name="prixOriginal" min="0">
+            </div>
           </div>
           <div class="row">
             <div class="col-md-4 mb-3">
@@ -141,7 +161,7 @@
             </div>
             <div class="col-md-4 mb-3">
               <label class="form-label">Sous-catégorie</label>
-              <input type="text" class="form-control" [(ngModel)]="currentProduit.sousCategorie" name="sousCategorie" placeholder="Ex: Homme, Femme, Sport">
+              <input type="text" class="form-control" [(ngModel)]="currentProduit.sousCategorie" name="sousCategorie">
             </div>
             <div class="col-md-4 mb-3">
               <label class="form-label">Genre *</label>
@@ -152,12 +172,42 @@
           </div>
           <div class="row">
             <div class="col-md-6 mb-3">
-              <label class="form-label">Prix (FCFA) *</label>
-              <input type="number" class="form-control" [(ngModel)]="currentProduit.prix" name="prix" required min="0">
+              <label class="form-label">Tailles (séparées par virgules)</label>
+              <input type="text" class="form-control" [(ngModel)]="taillesInput" name="tailles" placeholder="Ex: S,M,L,XL ou 39,40,41,42">
             </div>
             <div class="col-md-6 mb-3">
-              <label class="form-label">Stock *</label>
-              <input type="number" class="form-control" [(ngModel)]="currentProduit.stock" name="stock" required min="0">
+              <label class="form-label">Couleurs (séparées par virgules)</label>
+              <input type="text" class="form-control" [(ngModel)]="couleursInput" name="couleurs" placeholder="Ex: Noir,Blanc,Rouge,Bleu">
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Note (0-5)</label>
+              <input type="number" step="0.1" class="form-control" [(ngModel)]="currentProduit.rating" name="rating" min="0" max="5">
+            </div>
+            <div class="col-md-4 mb-3">
+              <div class="form-check mt-4">
+                <input class="form-check-input" type="checkbox" [(ngModel)]="currentProduit.isPromo" name="isPromo">
+                <label class="form-check-label">En promotion</label>
+              </div>
+            </div>
+            <div class="col-md-4 mb-3">
+              <div class="form-check mt-4">
+                <input class="form-check-input" type="checkbox" [(ngModel)]="currentProduit.isNew" name="isNew">
+                <label class="form-check-label">Nouveau produit</label>
+              </div>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">URL de l'image</label>
+            <input type="text" class="form-control" [(ngModel)]="currentProduit.imageUrl" name="imageUrl" placeholder="https://...">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Ou télécharger une image</label>
+            <input type="file" class="form-control" (change)="onFileSelected($event)" accept="image/*">
+            <div *ngIf="currentProduit.imageUrl" class="mt-2">
+              <img [src]="currentProduit.imageUrl" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;">
+              <button type="button" class="btn btn-sm btn-danger ms-2" (click)="removeImage()">Supprimer</button>
             </div>
           </div>
         </form>
@@ -167,6 +217,71 @@
         <button type="button" class="btn btn-primary" (click)="saveProduit()" [disabled]="produitForm.invalid">
           {{ isEditMode ? 'Mettre à jour' : 'Créer' }}
         </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DÉTAIL PRODUIT -->
+<div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" *ngIf="detailProduit">
+      <div class="modal-header">
+        <h5 class="modal-title">Détails du produit</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="text-center mb-3">
+          <img [src]="detailProduit.imageUrl || 'https://via.placeholder.com/200'" 
+               style="width: 150px; height: 150px; object-fit: cover; border-radius: 12px;">
+        </div>
+        <h4 class="text-center">{{ detailProduit.nom }}</h4>
+        <div class="text-center mb-3">
+          <span *ngIf="detailProduit.isNew" class="badge bg-success me-1">Nouveau</span>
+          <span *ngIf="detailProduit.isPromo" class="badge bg-danger">Promotion</span>
+          <span *ngIf="detailProduit.rating" class="badge bg-warning ms-1">{{ detailProduit.rating }} ★</span>
+        </div>
+        <p class="text-muted">{{ detailProduit.description || 'Aucune description' }}</p>
+        <hr>
+        <div class="row">
+          <div class="col-6"><strong>Prix :</strong></div>
+          <div class="col-6">
+            <span *ngIf="detailProduit.isPromo" class="text-decoration-line-through text-muted me-2">{{ detailProduit.prixOriginal | number }} F</span>
+            <span class="fw-bold text-primary">{{ detailProduit.prix | number }} F</span>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-6"><strong>Stock :</strong></div>
+          <div class="col-6" [class.text-danger]="detailProduit.stock < 5">{{ detailProduit.stock }}</div>
+        </div>
+        <div class="row">
+          <div class="col-6"><strong>Catégorie :</strong></div>
+          <div class="col-6">{{ detailProduit.categorie }}</div>
+        </div>
+        <div class="row">
+          <div class="col-6"><strong>Sous-catégorie :</strong></div>
+          <div class="col-6">{{ detailProduit.sousCategorie || '-' }}</div>
+        </div>
+        <div class="row">
+          <div class="col-6"><strong>Genre :</strong></div>
+          <div class="col-6">{{ detailProduit.genre }}</div>
+        </div>
+        <div class="row" *ngIf="detailProduit.tailles?.length">
+          <div class="col-6"><strong>Tailles :</strong></div>
+          <div class="col-6">
+            <span class="badge bg-secondary me-1" *ngFor="let t of detailProduit.tailles">{{ t }}</span>
+          </div>
+        </div>
+        <div class="row" *ngIf="detailProduit.couleurs?.length">
+          <div class="col-6"><strong>Couleurs :</strong></div>
+          <div class="col-6">
+            <span class="badge bg-secondary me-1" *ngFor="let c of detailProduit.couleurs">{{ c }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+        <button type="button" class="btn btn-primary" (click)="closeDetailModal(); openEditModal(detailProduit)">Modifier</button>
       </div>
     </div>
   </div>

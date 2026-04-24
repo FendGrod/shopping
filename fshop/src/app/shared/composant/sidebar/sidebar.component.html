@@ -7,7 +7,7 @@
 
   <hr>
 
-  <!-- Menu principal (visible par tous les admins) -->
+  
   <!-- Menu principal (visible par tous les admins) -->
 <div *ngFor="let group of menus">
   <small class="group-title">{{ group.group }}</small>
@@ -41,13 +41,15 @@
   <hr>
 
   <ul>
-    <li>
-      <a routerLink="/accueil">
+   
+ <li>
+      <a routerLink="/accueil" style="cursor: pointer;">
         <i class="fas fa-globe"></i>
-        <span>Voir le site</span>
+        <span>voir le site</span>
       </a>
     </li>
-    <li>
+  
+   <li>
       <a (click)="logout()" style="cursor: pointer;">
         <i class="fas fa-sign-out-alt"></i>
         <span>Déconnexion</span>

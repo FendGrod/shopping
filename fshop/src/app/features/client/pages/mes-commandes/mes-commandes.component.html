@@ -1,0 +1,132 @@
+<app-header></app-header>
+
+<div class="mes-commandes-page">
+  <div class="container py-4">
+    
+    <h2 class="fw-bold mb-4">
+      <i class="fas fa-shopping-bag me-2 text-primary"></i>Mes commandes
+    </h2>
+
+    <!-- Chargement -->
+    <div *ngIf="isLoading" class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Chargement...</span>
+      </div>
+    </div>
+
+    <!-- Message d'erreur -->
+    <div *ngIf="errorMessage" class="alert alert-danger">
+      {{ errorMessage }}
+    </div>
+
+    <!-- Liste des commandes -->
+    <div *ngIf="!isLoading && !errorMessage">
+      
+      <!-- Aucune commande -->
+      <div *ngIf="commandes.length === 0" class="text-center py-5">
+        <i class="fas fa-shopping-bag fa-4x text-muted mb-3"></i>
+        <h5>Vous n'avez pas encore de commande</h5>
+        <p class="text-muted">Découvrez nos produits et passez votre première commande !</p>
+        <button class="btn btn-primary" routerLink="/produits">
+          <i class="fas fa-store me-2"></i>Découvrir nos produits
+        </button>
+      </div>
+
+      <!-- Liste des commandes -->
+      <div class="commandes-list">
+        <div *ngFor="let commande of commandes" class="card border-0 shadow-sm rounded-4 mb-4">
+          <div class="card-header bg-white rounded-top-4 p-3 border-bottom">
+            <div class="row align-items-center">
+              <div class="col-md-4">
+                <small class="text-muted">Commande du : </small>
+                <strong>{{ formatDate(commande.dateCommande) }}</strong>
+              </div>
+              <div class="col-md-3">
+                <small class="text-muted">Référence : </small>
+                <strong>{{ commande.reference }}</strong>
+              </div>
+              <div class="col-md-2">
+                <small class="text-muted">Total : </small>
+                <strong class="text-primary">{{ formatMoney(commande.total) }}</strong>
+              </div>
+              <div class="col-md-3 text-end">
+                <span class="badge {{ getStatutClass(commande.statut) }} px-3 py-2">
+                  {{ getStatutText(commande.statut) }}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="card-body p-3">
+            <div class="row">
+              <div class="col-md-8">
+                <small class="text-muted">Livraison :</small>
+                <p class="mb-0">{{ commande.adresse }}, {{ commande.ville }}</p>
+              </div>
+              <div class="col-md-4 text-end">
+                <button class="btn btn-outline-primary btn-sm" (click)="voirDetails(commande)">
+                  <i class="fas fa-eye me-1"></i>Voir détails
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DÉTAILS COMMANDE -->
+<div class="modal fade" id="detailsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Détails de la commande</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" *ngIf="selectedCommande">
+        <p><strong>Référence :</strong> {{ selectedCommande.reference }}</p>
+        <p><strong>Date :</strong> {{ formatDate(selectedCommande.dateCommande) }}</p>
+        <p><strong>Statut :</strong> 
+          <span class="badge {{ getStatutClass(selectedCommande.statut) }}">{{ getStatutText(selectedCommande.statut) }}</span>
+        </p>
+        <hr>
+        <p><strong>Adresse de livraison :</strong><br>
+        {{ selectedCommande.adresse }},<br>
+        {{ selectedCommande.ville }} {{ selectedCommande.codePostal }}<br>
+        Tél: {{ selectedCommande.telephone }}
+        </p>
+        <hr>
+        <p><strong>Mode de livraison :</strong> {{ selectedCommande.modeLivraison === 'DOMICILE' ? 'À domicile' : 'Point relais' }}</p>
+        <p><strong>Mode de paiement :</strong> {{ selectedCommande.modePaiement }}</p>
+        <hr>
+        <h6>Produits</h6>
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead>
+              <tr><th>Produit</th><th>Quantité</th><th>Prix unitaire</th><th>Total</th></tr>
+            </thead>
+           <tbody>
+            <tr *ngFor="let ligne of selectedLignes">
+                <td>
+                {{ ligne.produitNom }}
+                <br><small class="text-muted" *ngIf="ligne.taille">Taille: {{ ligne.taille }}</small>
+                <br><small class="text-muted" *ngIf="ligne.couleur">Couleur: {{ ligne.couleur }}</small>
+                </td>
+                <td>{{ ligne.quantite }}</td>
+                <td>{{ formatMoney(ligne.prixUnitaire) }}</td>
+                <td>{{ formatMoney(ligne.prixUnitaire * ligne.quantite) }}</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="text-end mt-3">
+          <strong>Total : {{ formatMoney(selectedCommande.total) }}</strong>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -48,8 +48,9 @@ export class SidebarComponent implements OnInit {
     items: [
       { label: 'Clients', icon: 'users', key: 'clients' },   // ← renommé
       { label: 'Produits', icon: 'box', key: 'products' },
-      { label: 'Catégories', icon: 'tags', key: 'categories' },
-      { label: 'Commandes', icon: 'shopping-cart', key: 'orders' }
+      // { label: 'Catégories', icon: 'tags', key: 'categories' },
+      { label: 'Commandes', icon: 'shopping-cart', key: 'orders' },
+      //  { label: 'livraisons', icon: 'truck', key: 'livraison' }
     ]
   }
 ];
@@ -58,7 +59,9 @@ superAdminMenu = [
   {
     group: 'Super Admin',
     items: [
-      { label: 'Administrateurs', icon: 'user-shield', key: 'admins' }
+      { label: 'Administrateurs', icon: 'user-shield', key: 'admins' },
+      { label: 'Paramètres', icon: 'cog', key: 'settings' },
+     
     ]
   }
 ];

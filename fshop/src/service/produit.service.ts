@@ -31,6 +31,10 @@ export class ProduitService {
     return this.http.delete<void>(`${this.apiUrl}/delete/${id}`);
   }
 
+  deleteAll(ids: number[]): Observable<void> {
+    return this.http.request<void>('delete', `${this.apiUrl}/delete-all`, { body: ids });
+  }
+
   findByCategorie(categorie: string): Observable<Produit[]> {
     return this.http.get<Produit[]>(`${this.apiUrl}/categorie/${categorie}`);
   }
@@ -49,8 +53,18 @@ export class ProduitService {
   }
 
   importExcel(file: File): Observable<Produit[]> {
-  const formData = new FormData();
-  formData.append('file', file);
-  return this.http.post<Produit[]>(`${this.apiUrl}/import-excel`, formData);
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<Produit[]>(`${this.apiUrl}/import-excel`, formData);
+  }
+
+  getSousCategories(categorie: string): string[] {
+  const sousCategories: { [key: string]: string[] } = {
+    'CHAUSSURES': ['Homme', 'Femme', 'Enfant', 'Sport'],
+    'VETEMENTS': ['Hauts', 'Bas', 'Robe', 'Vestes', 'Pulls'],
+    'ACCESSOIRES': ['Sacs', 'Ceintures', 'Chapeaux', 'Montres', 'Lunettes'],
+    'SPORT': ['Running', 'Fitness', 'Football', 'Basketball', 'Yoga']
+  };
+  return sousCategories[categorie] || [];
 }
 }

@@ -1,0 +1,190 @@
+<div class="orders-container">
+  
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4><i class="fas fa-shopping-cart me-2"></i> Gestion des commandes</h4>
+    <span class="badge bg-secondary fs-6">Total : {{ filteredCommandes.length }}</span>
+  </div>
+
+  <!-- Filtres -->
+  <div class="filters-bar">
+    <div class="row g-3 align-items-end">
+      <div class="col-md-3">
+        <label class="form-label">Recherche</label>
+        <input type="text" class="form-control" placeholder="Réf, client, email..." 
+               [(ngModel)]="searchTerm" (input)="applyFilters()">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Statut</label>
+        <select class="form-select" [(ngModel)]="selectedStatut" (change)="applyFilters()">
+          <option value="">Tous</option>
+          <option *ngFor="let s of statuts" [value]="s">{{ statutsLabels[s] }}</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Date début</label>
+        <input type="date" class="form-control" [(ngModel)]="dateDebut" (change)="applyFilters()">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Date fin</label>
+        <input type="date" class="form-control" [(ngModel)]="dateFin" (change)="applyFilters()">
+      </div>
+      <div class="col-md-3">
+        <button class="btn btn-outline-secondary w-100" (click)="resetFilters()">
+          <i class="fas fa-undo-alt me-2"></i>Réinitialiser
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Chargement...</span>
+    </div>
+  </div>
+
+  <!-- Message erreur -->
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Tableau -->
+  <div *ngIf="!isLoading && !errorMessage" class="table-responsive">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Référence</th>
+          <th>Client</th>
+          <th>Date</th>
+          <th>Total</th>
+          <th>Statut</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let commande of filteredCommandes">
+          <td>
+            <strong>{{ commande.reference }}</strong>
+            <br><small class="text-muted">{{ commande.modePaiement }}</small>
+          </td>
+          <td>
+            {{ commande.utilisateur.prenom }} {{ commande.utilisateur.nom }}
+            <br><small class="text-muted">{{ commande.utilisateur.email }}</small>
+          </td>
+          <td>{{ formatDate(commande.dateCommande) }}</td>
+          <td class="fw-bold">{{ formatMoney(commande.total) }}</td>
+          <td>
+            <span class="badge {{ getStatutClass(commande.statut) }} px-3 py-2">
+              {{ statutsLabels[commande.statut] }}
+            </span>
+          </td>
+          <td>
+            <button class="btn btn-sm btn-outline-info me-1" (click)="voirDetails(commande)" title="Détails">
+              <i class="fas fa-eye"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-primary" (click)="changerStatut(commande)" title="Changer statut">
+              <i class="fas fa-edit"></i>
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="filteredCommandes.length === 0">
+          <td colspan="6" class="text-center py-5">Aucune commande trouvée</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- MODAL DÉTAILS COMMANDE -->
+<div class="modal fade" id="detailsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content" *ngIf="selectedCommande">
+      <div class="modal-header">
+        <h5 class="modal-title">Détails de la commande #{{ selectedCommande.reference }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <strong>Client :</strong> {{ selectedCommande.utilisateur.prenom }} {{ selectedCommande.utilisateur.nom }}
+          </div>
+          <div class="col-md-6">
+            <strong>Email :</strong> {{ selectedCommande.utilisateur.email }}
+          </div>
+        </div>
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <strong>Téléphone :</strong> {{ selectedCommande.telephone }}
+          </div>
+          <div class="col-md-6">
+            <strong>Date :</strong> {{ formatDate(selectedCommande.dateCommande) }}
+          </div>
+        </div>
+        <div class="mb-3">
+          <strong>Adresse de livraison :</strong><br>
+          {{ selectedCommande.adresse }}, {{ selectedCommande.ville }}
+        </div>
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <strong>Mode livraison :</strong> {{ selectedCommande.modeLivraison === 'DOMICILE' ? 'À domicile' : 'Point relais' }}
+          </div>
+          <div class="col-md-6">
+            <strong>Mode paiement :</strong> {{ selectedCommande.modePaiement }}
+          </div>
+        </div>
+        <hr>
+        <h6>Produits commandés</h6>
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead>
+              <tr><th>Produit</th><th>Taille</th><th>Couleur</th><th>Qté</th><th>Prix unitaire</th><th>Total</th></tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let ligne of selectedLignes">
+                <td>{{ ligne.produitNom }}</td>
+                <td>{{ ligne.taille || '-' }}</td>
+                <td>{{ ligne.couleur || '-' }}</td>
+                <td>{{ ligne.quantite }}</td>
+                <td>{{ formatMoney(ligne.prixUnitaire) }}</td>
+                <td>{{ formatMoney(ligne.prixUnitaire * ligne.quantite) }}</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr class="fw-bold">
+                <td colspan="5" class="text-end">Total :</td>
+                <td>{{ formatMoney(selectedCommande.total) }}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CHANGER STATUT -->
+<div class="modal fade" id="statutModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" *ngIf="selectedCommande">
+      <div class="modal-header">
+        <h5 class="modal-title">Changer le statut de la commande #{{ selectedCommande.reference }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <label class="form-label">Nouveau statut</label>
+        <select class="form-select" [(ngModel)]="nouveauStatut">
+          <option *ngFor="let s of statuts" [value]="s">{{ statutsLabels[s] }}</option>
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+        <button type="button" class="btn btn-primary" (click)="validerChangementStatut()">
+          <i class="fas fa-save me-2"></i>Enregistrer
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

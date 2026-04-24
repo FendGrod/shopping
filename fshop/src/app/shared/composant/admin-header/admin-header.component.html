@@ -4,8 +4,26 @@
       <i class="fas fa-{{ getMenuIcon() }} me-2"></i>
       {{ getMenuTitle() }}
     </h5>
+    
     <div class="d-flex gap-3 align-items-center">
-      <i class="fas fa-bell text-secondary" style="cursor: pointer;"></i>
+      
+      <!-- 🔔 ICÔNE NOTIFICATIONS -->
+      <div class="position-relative" style="cursor: pointer;" (click)="openNotifications()">
+        <i class="fas fa-bell text-secondary fs-5"></i>
+        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" *ngIf="nonLuesCount > 0">
+          {{ nonLuesCount }}
+        </span>
+      </div>
+      
+      <!-- 💬 ICÔNE MESSAGES -->
+      <div class="position-relative" style="cursor: pointer;" (click)="openMessages()">
+        <i class="fas fa-envelope text-secondary fs-5"></i>
+        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary" *ngIf="nonRepondusCount > 0">
+          {{ nonRepondusCount }}
+        </span>
+      </div>
+      
+      <!-- 👤 PROFIL -->
       <div class="dropdown">
         <button class="btn btn-link text-dark text-decoration-none dropdown-toggle" data-bs-toggle="dropdown">
           <i class="fas fa-user-circle fs-5"></i>
@@ -14,9 +32,112 @@
         <ul class="dropdown-menu dropdown-menu-end">
           <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>Mon profil</a></li>
           <li><hr class="dropdown-divider"></li>
-          <li><a class="dropdown-item text-danger" (click)="logout()" style="cursor: pointer;"><i class="fas fa-sign-out-alt me-2"></i>Déconnexion</a></li>
+          <li><a class="dropdown-item text-danger" (click)="logout()" style="cursor: pointer;">
+            <i class="fas fa-sign-out-alt me-2"></i>Déconnexion
+          </a></li>
         </ul>
       </div>
     </div>
   </div>
 </nav>
+
+<!-- MODAL NOTIFICATIONS (inchangé) -->
+<div class="modal fade" id="notificationsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fas fa-bell me-2"></i>Notifications</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-0">
+        <div class="notification-list">
+          <div *ngFor="let notif of notifications" class="notification-item" [class.non-lue]="!notif.lu">
+            <div class="notification-icon"><i class="fas fa-shopping-cart"></i></div>
+            <div class="notification-content">
+              <div class="notification-title">{{ notif.titre }}</div>
+              <div class="notification-message">{{ notif.message }}</div>
+              <div class="notification-date">{{ notif.dateCreation | date:'dd/MM/yyyy HH:mm' }}</div>
+            </div>
+          </div>
+          <div *ngIf="notifications.length === 0" class="text-center p-5 text-muted">
+            <i class="fas fa-bell-slash fa-3x mb-3"></i>
+            <p>Aucune notification</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL MESSAGES (style WhatsApp) -->
+<div class="modal fade" id="messagesModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content" style="height: 80vh;">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fas fa-envelope me-2"></i>Messages des clients</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-0">
+        <div class="row g-0 h-100">
+          
+          <!-- Liste des conversations -->
+          <div class="col-md-4 border-end">
+            <div class="conversation-list">
+              <div *ngFor="let msg of messages" class="conversation-item" [class.active]="selectedMessage?.id === msg.id" (click)="openConversation(msg)">
+                <div class="conversation-avatar">
+                  <i class="fas fa-user-circle fa-2x text-secondary"></i>
+                  <span *ngIf="!msg.estRepondu" class="unread-badge"></span>
+                </div>
+                <div class="conversation-info">
+                  <div class="conversation-name">{{ msg.nom }}</div>
+                  <div class="conversation-message">{{ msg.sujet }}</div>
+                  <div class="conversation-time">{{ formatDate(msg.dateEnvoi) }}</div>
+                </div>
+              </div>
+              <div *ngIf="messages.length === 0" class="text-center p-4 text-muted">
+                <i class="fas fa-inbox fa-3x mb-2"></i>
+                <p>Aucun message</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Zone de conversation -->
+          <div class="col-md-8">
+            <div *ngIf="selectedMessage" class="conversation-view">
+              <div class="message-header">
+                <h6>{{ selectedMessage.nom }}</h6>
+                <small class="text-muted">{{ selectedMessage.email }}</small>
+              </div>
+              <div class="message-body">
+                <div class="client-message">
+                  <strong>Sujet:</strong> {{ selectedMessage.sujet }}<br>
+                  <strong>Message:</strong>
+                  <p class="mt-1">{{ selectedMessage.contenu }}</p>
+                  <small class="text-muted">{{ formatDate(selectedMessage.dateEnvoi) }}</small>
+                </div>
+                <div *ngIf="selectedMessage.reponse" class="admin-message mt-3">
+                  <strong>Votre réponse:</strong>
+                  <p class="mt-1">{{ selectedMessage.reponse }}</p>
+                  <small class="text-muted">{{ formatDate(selectedMessage.dateReponse) }}</small>
+                </div>
+              </div>
+              <div class="reply-box">
+                <textarea class="form-control" rows="3" [(ngModel)]="reponseText" placeholder="Écrire une réponse..."></textarea>
+                <button class="btn btn-primary mt-2" (click)="envoyerReponse()" [disabled]="!reponseText.trim()">
+                  <i class="fas fa-paper-plane"></i> Envoyer
+                </button>
+              </div>
+            </div>
+            <div *ngIf="!selectedMessage" class="no-conversation">
+              <i class="fas fa-comments fa-4x text-muted mb-3"></i>
+              <p>Sélectionnez un message pour répondre</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

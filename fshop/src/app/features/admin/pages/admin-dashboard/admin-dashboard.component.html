@@ -50,7 +50,6 @@
 
   <!-- SECTION PRINCIPALE : GRAPHIQUE + ACTIVITÉS -->
   <div class="row g-4 mb-4">
-    <!-- GRAPHIQUE DES VENTES (GAUCHE) -->
     <div class="col-lg-7">
       <div class="card-chart h-100">
         <div class="card-header-custom">
@@ -58,13 +57,12 @@
         </div>
         <div class="card-body">
           <div style="height: 320px;">
-          <canvas #salesCanvas></canvas>
+            <canvas #salesCanvas></canvas>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- ACTIVITÉS RÉCENTES (DROITE) -->
     <div class="col-lg-5">
       <div class="card-activities h-100">
         <div class="card-header-custom">
@@ -122,21 +120,17 @@
         </div>
         <div class="card-body">
           <div class="category-stats">
-            <div class="category-item">
-              <span>Chaussures</span>
-              <div class="progress"><div class="progress-bar bg-primary" style="width: 45%">45%</div></div>
+            <div *ngIf="categorySalesStats.length === 0" class="text-center text-muted py-3">
+              Aucune donnée de vente disponible
             </div>
-            <div class="category-item">
-              <span>Vêtements</span>
-              <div class="progress"><div class="progress-bar bg-success" style="width: 30%">30%</div></div>
-            </div>
-            <div class="category-item">
-              <span>Accessoires</span>
-              <div class="progress"><div class="progress-bar bg-warning" style="width: 15%">15%</div></div>
-            </div>
-            <div class="category-item">
-              <span>Sport</span>
-              <div class="progress"><div class="progress-bar bg-info" style="width: 10%">10%</div></div>
+            <div *ngFor="let cat of categorySalesStats" class="category-item">
+              <div class="d-flex justify-content-between">
+                <span>{{ cat.name }}</span>
+                <span class="fw-bold">{{ cat.percentage }}%</span>
+              </div>
+              <div class="progress mt-1">
+                <div class="progress-bar {{ cat.color }}" [style.width]="cat.percentage + '%'"></div>
+              </div>
             </div>
           </div>
         </div>

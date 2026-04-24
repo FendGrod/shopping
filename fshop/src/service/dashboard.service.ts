@@ -1,5 +1,9 @@
 import { Injectable } from '@angular/core';
-import { Observable, of, interval, map } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { CommandeService } from './commande.service';
+import { UtilisateurService } from './utilisateur-service';
+import { ProduitService } from './produit.service';
 
 export interface DashboardStats {
   users: number;
@@ -22,85 +26,237 @@ export interface SalesData {
 
 @Injectable({ providedIn: 'root' })
 export class DashboardService {
-  private activities: Activity[] = [];
-  private nextId = 1;
 
-  constructor() {
-    // Initialiser quelques activités factices
-    this.generateMockActivities();
-    // Simuler des activités en temps réel toutes les 15 secondes
-    interval(15000).subscribe(() => this.addRandomActivity());
+  constructor(
+    private http: HttpClient,
+    private commandeService: CommandeService,
+    private utilisateurService: UtilisateurService,
+    private produitService: ProduitService
+  ) {}
+
+  private getHeaders(): HttpHeaders {
+    const userStr = localStorage.getItem('currentUser');
+    const user = userStr ? JSON.parse(userStr) : null;
+    const userId = user?.id || 0;
+    return new HttpHeaders({ 'userId': userId.toString() });
   }
-
-  private generateMockActivities() {
-    const mockMessages = [
-      'Nouvel utilisateur inscrit : jean.dupont@email.com',
-      'Commande #1234 validée (125 000 FCFA)',
-      'Produit "Nike Air Max" ajouté au stock',
-      'Nouvelle catégorie "Accessoires" créée',
-      'Utilisateur admin@shop.com a modifié son profil'
-    ];
-    for (let i = 0; i < 5; i++) {
-      this.activities.push({
-        id: this.nextId++,
-        type: 'user',
-        message: mockMessages[i % mockMessages.length],
-        date: new Date(Date.now() - i * 3600000)
-      });
-    }
-  }
-
- private addRandomActivity() {
-  const types: ('user' | 'order' | 'product')[] = ['user', 'order', 'product'];
-  const randomType = types[Math.floor(Math.random() * types.length)];
-  let message = '';
-  if (randomType === 'user') message = `Nouvel utilisateur inscrit : user${Math.floor(Math.random() * 1000)}@mail.com`;
-  if (randomType === 'order') message = `Nouvelle commande #${Math.floor(Math.random() * 9000)} de ${Math.floor(Math.random() * 50000)} FCFA`;
-  if (randomType === 'product') message = `Produit "${['T-shirt', 'Jean', 'Basket'][Math.floor(Math.random() * 3)]}" ajouté`;
-
-  this.activities.unshift({
-    id: this.nextId++,
-    type: randomType, // maintenant OK
-    message,
-    date: new Date()
-  });
-  if (this.activities.length > 10) this.activities.pop();
-}
 
   getStats(): Observable<DashboardStats> {
-    // Simulation de données réelles (plus tard appels API)
-    return of({
-      users: 1248,
-      products: 342,
-      orders: 189,
-      revenue: 12567890
+    return new Observable(observer => {
+      Promise.all([
+        this.utilisateurService.readAll().toPromise(),
+        this.produitService.readAll().toPromise(),
+        this.commandeService.getAllCommandes().toPromise()
+      ]).then(([users, produits, commandes]) => {
+        const stats: DashboardStats = {
+          users: users?.length || 0,
+          products: produits?.length || 0,
+          orders: commandes?.length || 0,
+          revenue: commandes?.reduce((sum, c) => sum + c.total, 0) || 0
+        };
+        observer.next(stats);
+        observer.complete();
+      }).catch(err => {
+        console.error('Erreur chargement stats', err);
+        observer.next({ users: 0, products: 0, orders: 0, revenue: 0 });
+        observer.complete();
+      });
     });
   }
 
   getRecentActivities(): Observable<Activity[]> {
-    return of([...this.activities]);
+    return new Observable(observer => {
+      Promise.all([
+        this.commandeService.getAllCommandes().toPromise(),
+        this.utilisateurService.readAll().toPromise(),
+        this.produitService.readAll().toPromise()
+      ]).then(([commandes, users, produits]) => {
+        const activities: Activity[] = [];
+        
+        const dernieresCommandes = (commandes || []).slice(0, 5);
+        dernieresCommandes.forEach(c => {
+          activities.push({
+            id: c.id!,
+            type: 'order',
+            message: `Nouvelle commande #${c.reference} de ${c.total.toLocaleString()} FCFA`,
+            date: new Date(c.dateCommande)
+          });
+        });
+        
+        const derniersUsers = (users || []).slice(0, 3);
+        derniersUsers.forEach(u => {
+          activities.push({
+            id: u.id!,
+            type: 'user',
+            message: `Nouvel utilisateur inscrit : ${u.prenom} ${u.nom}`,
+           date: u.dateCreation ? new Date(u.dateCreation) : new Date()
+          });
+        });
+        
+        const derniersProduits = (produits || []).slice(0, 3);
+        derniersProduits.forEach(p => {
+          activities.push({
+            id: p.id!,
+            type: 'product',
+            message: `Nouveau produit ajouté : ${p.nom}`,
+            date: new Date(p.dateCreation!)
+          });
+        });
+        
+        activities.sort((a, b) => b.date.getTime() - a.date.getTime());
+        observer.next(activities.slice(0, 10));
+        observer.complete();
+      }).catch(err => {
+        console.error('Erreur chargement activités', err);
+        observer.next([]);
+        observer.complete();
+      });
+    });
   }
 
   getSalesData(): Observable<SalesData> {
-    // Données pour le graphique (7 derniers jours)
-    return of({
-      labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
-      datasets: [
-        {
-          label: 'Ventes (FCFA)',
-          data: [125000, 98000, 142000, 187000, 210000, 256000, 198000]
+    return new Observable(observer => {
+      this.commandeService.getAllCommandes().subscribe({
+        next: (commandes) => {
+          const jours = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+          const ventesParJour = [0, 0, 0, 0, 0, 0, 0];
+          
+          const aujourdHui = new Date();
+          const debutSemaine = new Date(aujourdHui);
+          debutSemaine.setDate(aujourdHui.getDate() - 6);
+          
+          commandes.forEach(commande => {
+            const dateCommande = new Date(commande.dateCommande);
+            if (dateCommande >= debutSemaine) {
+              const jourIndex = dateCommande.getDay();
+              const indexMap: { [key: number]: number } = { 1: 0, 2: 1, 3: 2, 4: 3, 5: 4, 6: 5, 0: 6 };
+              const idx = indexMap[jourIndex];
+              if (idx !== undefined) {
+                ventesParJour[idx] += commande.total;
+              }
+            }
+          });
+          
+          observer.next({
+            labels: jours,
+            datasets: [{ label: 'Ventes (FCFA)', data: ventesParJour }]
+          });
+          observer.complete();
+        },
+        error: (err) => {
+          console.error('Erreur chargement graphique', err);
+          observer.next({
+            labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
+            datasets: [{ label: 'Ventes (FCFA)', data: [0, 0, 0, 0, 0, 0, 0] }]
+          });
+          observer.complete();
         }
-      ]
+      });
     });
   }
 
   getTopProducts(): Observable<any[]> {
-    return of([
-      { name: 'Nike Air Max', sales: 45, revenue: 3825000 },
-      { name: 'Adidas Ultraboost', sales: 32, revenue: 3040000 },
-      { name: 'Puma Suede', sales: 28, revenue: 1540000 },
-      { name: 'Converse Chuck', sales: 24, revenue: 1152000 },
-      { name: 'Vans Old Skool', sales: 19, revenue: 798000 }
-    ]);
+    return new Observable(observer => {
+      this.commandeService.getAllCommandes().subscribe({
+        next: (commandes) => {
+          const produitsVentes: { [key: string]: { name: string; sales: number; revenue: number } } = {};
+          
+          const lignesPromises = commandes.map(c => 
+            this.commandeService.getLignesByCommandeId(c.id!).toPromise()
+          );
+          
+          Promise.all(lignesPromises).then(toutesLignes => {
+            toutesLignes.forEach(lignes => {
+              (lignes || []).forEach(ligne => {
+                if (!produitsVentes[ligne.produitNom]) {
+                  produitsVentes[ligne.produitNom] = {
+                    name: ligne.produitNom,
+                    sales: 0,
+                    revenue: 0
+                  };
+                }
+                produitsVentes[ligne.produitNom].sales += ligne.quantite;
+                produitsVentes[ligne.produitNom].revenue += ligne.prixUnitaire * ligne.quantite;
+              });
+            });
+            
+            const top = Object.values(produitsVentes)
+              .sort((a, b) => b.sales - a.sales)
+              .slice(0, 5);
+            
+            observer.next(top);
+            observer.complete();
+          }).catch(() => {
+            observer.next([]);
+            observer.complete();
+          });
+        },
+        error: () => {
+          observer.next([]);
+          observer.complete();
+        }
+      });
+    });
+  }
+
+  getCategorySalesStats(): Observable<{ name: string; percentage: number; color: string }[]> {
+    return new Observable(observer => {
+      this.commandeService.getAllCommandes().subscribe({
+        next: (commandes) => {
+          const categoryTotals: { [key: string]: number } = {};
+          
+          const categorieNoms: { [key: string]: string } = {
+            'CHAUSSURES': 'Chaussures',
+            'VETEMENTS': 'Vêtements',
+            'ACCESSOIRES': 'Accessoires',
+            'SPORT': 'Sport'
+          };
+          
+          const couleurs: { [key: string]: string } = {
+            'CHAUSSURES': 'bg-primary',
+            'VETEMENTS': 'bg-success',
+            'ACCESSOIRES': 'bg-warning',
+            'SPORT': 'bg-info'
+          };
+          
+          const processCommandes = async () => {
+            for (const commande of commandes) {
+              const lignes = await this.commandeService.getLignesByCommandeId(commande.id!).toPromise();
+              for (const ligne of lignes || []) {
+                const produit = await this.produitService.read(ligne.produitId).toPromise();
+                if (produit) {
+                  const cat = produit.categorie;
+                  const montant = ligne.prixUnitaire * ligne.quantite;
+                  categoryTotals[cat] = (categoryTotals[cat] || 0) + montant;
+                }
+              }
+            }
+            
+            const total = Object.values(categoryTotals).reduce((a, b) => a + b, 0);
+            
+            const result = Object.entries(categoryTotals)
+              .filter(([_, montant]) => montant > 0)
+              .map(([categorie, montant]) => ({
+                name: categorieNoms[categorie] || categorie,
+                percentage: total > 0 ? Math.round((montant / total) * 100) : 0,
+                color: couleurs[categorie] || 'bg-secondary'
+              }));
+            
+            observer.next(result);
+            observer.complete();
+          };
+          
+          processCommandes().catch(() => {
+            observer.next([]);
+            observer.complete();
+          });
+        },
+        error: (err) => {
+          console.error('Erreur', err);
+          observer.next([]);
+          observer.complete();
+        }
+      });
+    });
   }
 }

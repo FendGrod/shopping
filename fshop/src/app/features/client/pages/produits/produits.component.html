@@ -1,0 +1,281 @@
+<app-header></app-header>
+
+<div class="produits-page">
+
+  <!-- Hero section avec slider en arrière-plan -->
+  <div class="hero-section">
+    <div id="heroSlider" class="carousel slide" data-bs-ride="carousel">
+      <div class="carousel-inner">
+        <div class="carousel-item" *ngFor="let img of backgroundImages; let i = index" [class.active]="i === currentImageIndex">
+          <div class="hero-bg" [style.backgroundImage]="'url(' + img + ')'"></div>
+        </div>
+      </div>
+      <div class="hero-overlay"></div>
+      <div class="container hero-content">
+        <h1>{{ getPageTitle() }}</h1>
+        <p>Découvrez notre sélection de {{ getPageTitle() | lowercase }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDER CATÉGORIES -->
+  <div class="categories-slider">
+    <div class="container">
+      <div class="row text-center g-3">
+        <div class="col-6 col-md-3">
+          <a class="category-card" [routerLink]="['/produits']" [queryParams]="{categorie: 'CHAUSSURES'}">
+            <div class="category-icon"><i class="fas fa-shoe-prints"></i></div>
+            <div class="category-name">Chaussures</div>
+          </a>
+        </div>
+        <div class="col-6 col-md-3">
+          <a class="category-card" [routerLink]="['/produits']" [queryParams]="{categorie: 'VETEMENTS'}">
+            <div class="category-icon"><i class="fas fa-tshirt"></i></div>
+            <div class="category-name">Vêtements</div>
+          </a>
+        </div>
+        <div class="col-6 col-md-3">
+          <a class="category-card" [routerLink]="['/produits']" [queryParams]="{categorie: 'ACCESSOIRES'}">
+            <div class="category-icon"><i class="fas fa-gem"></i></div>
+            <div class="category-name">Accessoires</div>
+          </a>
+        </div>
+        <div class="col-6 col-md-3">
+          <a class="category-card" [routerLink]="['/produits']" [queryParams]="{categorie: 'SPORT'}">
+            <div class="category-icon"><i class="fas fa-futbol"></i></div>
+            <div class="category-name">Sport</div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container py-5">
+
+    <div class="row">
+
+      <!-- Sidebar filtres -->
+      <div class="col-lg-3 mb-4">
+        <div class="filters-card">
+          <h5 class="mb-3"><i class="fas fa-filter me-2"></i>Filtres</h5>
+
+          <!-- Filtre par sous-catégorie -->
+          <div *ngIf="sousCategories.length > 0" class="mb-3">
+            <label class="form-label fw-semibold">Catégorie</label>
+            <div class="d-flex flex-column gap-2">
+              <a *ngFor="let sousCat of sousCategories" 
+                 class="filter-link" 
+                 [class.active]="selectedSousCategorie === sousCat"
+                 [routerLink]="['/produits']" 
+                 [queryParams]="{categorie: selectedCategorie, sousCategorie: sousCat}">
+                {{ sousCat }}
+              </a>
+              <a *ngIf="selectedSousCategorie" 
+                 class="filter-link text-primary mt-1"
+                 [routerLink]="['/produits']" 
+                 [queryParams]="{categorie: selectedCategorie}">
+                <i class="fas fa-times-circle me-1"></i> Voir tous
+              </a>
+            </div>
+          </div>
+
+          <!-- Filtre par genre -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Genre</label>
+            <select class="form-select" [(ngModel)]="selectedGenre" (change)="applyFilters()">
+              <option value="">Tous</option>
+              <option *ngFor="let g of genres" [value]="g">{{ g }}</option>
+            </select>
+          </div>
+
+          <!-- Barre de recherche -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Recherche</label>
+            <input type="text" class="form-control" placeholder="Nom du produit..." 
+                   [(ngModel)]="searchTerm" (input)="applyFilters()">
+          </div>
+
+          <button class="btn btn-outline-secondary w-100" (click)="resetFilters()">
+            <i class="fas fa-undo-alt me-2"></i>Réinitialiser
+          </button>
+        </div>
+      </div>
+
+      <!-- Grille produits -->
+      <div class="col-lg-9">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <p class="text-muted mb-0">{{ filteredProduits.length }} produit(s) trouvé(s)</p>
+        </div>
+
+        <div *ngIf="loading" class="text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Chargement...</span>
+          </div>
+        </div>
+
+        <div *ngIf="!loading" class="row g-4">
+          <div *ngFor="let produit of paginatedProduits" class="col-md-6 col-lg-4">
+            <div class="product-card">
+
+              <!-- Badges -->
+              <div class="product-badges">
+                <span *ngIf="produit.isPromo" class="badge bg-danger">-{{ getRemise(produit) }}%</span>
+                <span *ngIf="produit.isNew" class="badge bg-success">Nouveau</span>
+                <span *ngIf="produit.stock === 0" class="badge bg-dark">Rupture</span>
+                <span *ngIf="produit.stock < 5 && produit.stock > 0" class="badge bg-warning text-dark">Plus que {{ produit.stock }}</span>
+              </div>
+
+              <!-- Image -->
+              <div class="product-image">
+                <img [src]="produit.imageUrl || 'assets/placeholder.jpg'" [alt]="produit.nom">
+                <div class="product-overlay" *ngIf="produit.stock > 0">
+                  <button class="btn btn-light btn-sm rounded-circle" (click)="openModal(produit)">
+                    <i class="fas fa-shopping-cart"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Infos produit -->
+              <div class="product-info">
+                <h5 class="product-title">{{ produit.nom }}</h5>
+                <p class="product-description">{{ (produit.description || '') | slice:0:80 }}...</p>
+
+                <!-- Prix -->
+                <div class="product-price">
+                  <span class="current-price">{{ produit.prix | number }} FCFA</span>
+                  <span *ngIf="produit.prixOriginal" class="original-price">{{ produit.prixOriginal | number }} FCFA</span>
+                </div>
+
+                <!-- Note -->
+                <div *ngIf="produit.rating" class="product-rating">
+                  <span class="text-warning">★</span>
+                  <span class="ms-1">{{ produit.rating }} / 5</span>
+                </div>
+
+                <!-- Stock restant -->
+                <div class="product-stock mt-2">
+                  <span *ngIf="produit.stock === 0" class="text-danger fw-bold">
+                    <i class="fas fa-times-circle"></i> Rupture de stock
+                  </span>
+                  <span *ngIf="produit.stock > 0 && produit.stock < 5" class="text-warning">
+                    <i class="fas fa-exclamation-triangle"></i> Plus que {{ produit.stock }} exemplaire(s)
+                  </span>
+                  <span *ngIf="produit.stock >= 5" class="text-success">
+                    <i class="fas fa-check-circle"></i> {{ produit.stock }} en stock
+                  </span>
+                </div>
+
+                <!-- Bouton ajouter -->
+                <button class="btn w-100 mt-3" 
+                        [ngClass]="produit.stock > 0 ? 'btn-primary' : 'btn-secondary'"
+                        (click)="produit.stock > 0 && openModal(produit)"
+                        [disabled]="produit.stock === 0">
+                  <i class="fas fa-shopping-cart me-2"></i>
+                  {{ produit.stock > 0 ? 'Ajouter au panier' : 'Indisponible' }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div *ngIf="filteredProduits.length > 0" class="pagination-wrapper mt-4">
+          <nav>
+            <ul class="pagination justify-content-center">
+              <li class="page-item" [class.disabled]="currentPage === 1">
+                <a class="page-link" (click)="goToPage(currentPage - 1, $event)" href="#">Précédent</a>
+              </li>
+              <li class="page-item" *ngFor="let p of [].constructor(totalPages); let i = index">
+                <a class="page-link" [class.active]="currentPage === i+1" (click)="goToPage(i+1, $event)" href="#">{{ i+1 }}</a>
+              </li>
+              <li class="page-item" [class.disabled]="currentPage === totalPages">
+                <a class="page-link" (click)="goToPage(currentPage + 1, $event)" href="#">Suivant</a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+
+        <div *ngIf="!loading && filteredProduits.length === 0" class="text-center py-5">
+          <i class="fas fa-search fa-3x text-muted mb-3"></i>
+          <h4>Aucun produit trouvé</h4>
+          <p class="text-muted">Essayez de modifier vos filtres ou revenez plus tard.</p>
+          <button class="btn btn-primary" (click)="resetFilters()">Voir tous les produits</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL AJOUT AU PANIER -->
+<div class="modal fade" id="produitModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" *ngIf="selectedProduit">
+      <div class="modal-header">
+        <h5 class="modal-title">Ajouter au panier</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="text-center mb-3">
+          <img [src]="selectedProduit.imageUrl" style="width: 150px; height: 150px; object-fit: cover; border-radius: 12px;">
+          <h4 class="mt-2">{{ selectedProduit.nom }}</h4>
+          <p class="text-primary fw-bold">{{ selectedProduit.prix | number }} FCFA</p>
+        </div>
+
+        <div class="row">
+          <div *ngIf="selectedProduit.tailles?.length" class="col-md-6 mb-3">
+            <label class="form-label">Taille</label>
+            <select class="form-select" [(ngModel)]="selectedTaille">
+              <option *ngFor="let t of selectedProduit.tailles" [value]="t">{{ t }}</option>
+            </select>
+          </div>
+          <div *ngIf="selectedProduit.couleurs?.length" class="col-md-6 mb-3">
+            <label class="form-label">Couleur</label>
+            <select class="form-select" [(ngModel)]="selectedCouleur">
+              <option *ngFor="let c of selectedProduit.couleurs" [value]="c">{{ c }}</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Sélecteur quantité -->
+        <div class="mb-3">
+          <label class="form-label">Quantité (max: {{ selectedProduit.stock }})</label>
+          <div class="quantity-selector">
+            <button class="btn btn-outline-secondary" 
+                    (click)="decrementerQuantite()" 
+                    [disabled]="quantite <= 1">-</button>
+            <input type="number" 
+                   class="quantity-input" 
+                   [ngModel]="quantite" 
+                   (ngModelChange)="onQuantiteChange($event)"
+                   min="1" 
+                   [max]="selectedProduit.stock"
+                   name="quantite">
+            <button class="btn btn-outline-secondary" 
+                    (click)="incrementerQuantite()" 
+                    [disabled]="quantite >= selectedProduit.stock">+</button>
+          </div>
+        </div>
+
+        <!-- Alerte quantité max -->
+        <div class="alert alert-warning" *ngIf="quantiteMaxAtteinte">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          Vous avez atteint la quantité maximale disponible ({{ selectedProduit.stock }}).
+        </div>
+
+        <div class="alert alert-info" *ngIf="selectedProduit.stock < 5">
+          <i class="fas fa-info-circle me-2"></i>Plus que {{ selectedProduit.stock }} exemplaires !
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Continuer</button>
+        <button type="button" class="btn btn-primary" 
+                (click)="ajouterAuPanier()" 
+                [disabled]="quantiteMaxAtteinte || quantite > selectedProduit.stock">
+          <i class="fas fa-cart-plus me-2"></i>Ajouter
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,23 @@
+.mes-commandes-page {
+  padding-top: 76px;
+  min-height: 100vh;
+  background: #f8fafc;
+}
+
+.card-header {
+  background: white;
+}
+
+.commandes-list .card {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.commandes-list .card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
+}
+
+.badge {
+  font-size: 0.75rem;
+  font-weight: 500;
+}

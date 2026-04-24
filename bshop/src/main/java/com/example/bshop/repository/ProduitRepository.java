@@ -5,8 +5,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.util.List;
+import java.util.Optional;
 
 public interface ProduitRepository extends JpaRepository<Produit, Long> {
+
+    // Ajoute cette méthode pour vérifier les doublons
+    Optional<Produit> findByNom(String nom);
+
     List<Produit> findByCategorie(String categorie);
     List<Produit> findBySousCategorie(String sousCategorie);
     List<Produit> findByGenre(String genre);

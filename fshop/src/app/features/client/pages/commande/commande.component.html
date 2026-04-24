@@ -1,0 +1,174 @@
+<app-header></app-header>
+
+<div class="commande-page">
+  <div class="container py-4">
+    
+    <h2 class="fw-bold mb-4">
+      <i class="fas fa-clipboard-list me-2"></i>Validation de la commande
+    </h2>
+
+    <div class="row g-4">
+      
+      <!-- Formulaire de livraison -->
+      <div class="col-lg-7">
+        <div class="card border-0 shadow-sm rounded-4 p-4">
+          <h4 class="fw-bold mb-4">
+            <i class="fas fa-truck me-2 text-primary"></i>Informations de livraison
+          </h4>
+          
+          <div class="mb-3">
+            <label class="form-label">Adresse complète *</label>
+            <input type="text" class="form-control" [(ngModel)]="adresseLivraison.adresse" 
+                   placeholder="Ex: 123 Rue de la Liberté">
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Ville *</label>
+              <input type="text" class="form-control" [(ngModel)]="adresseLivraison.ville" 
+                     placeholder="Dakar">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Code postal</label>
+              <input type="text" class="form-control" [(ngModel)]="adresseLivraison.codePostal" 
+                     placeholder="10000">
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label">Téléphone *</label>
+            <input type="tel" class="form-control" [(ngModel)]="adresseLivraison.telephone" 
+                   placeholder="77 123 45 67">
+          </div>
+          
+          <hr class="my-4">
+          
+          <h4 class="fw-bold mb-3">
+            <i class="fas fa-shipping-fast me-2 text-primary"></i>Mode de livraison
+          </h4>
+          
+          <div class="delivery-options mb-4">
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="radio" name="modeLivraison" 
+                     value="DOMICILE" [(ngModel)]="modeLivraison" (change)="onModeLivraisonChange()">
+              <label class="form-check-label">
+                <strong>Livraison à domicile</strong>
+                <span class="text-muted ms-2">+ 2 000 FCFA</span>
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="modeLivraison" 
+                     value="POINT_RELAIS" [(ngModel)]="modeLivraison" (change)="onModeLivraisonChange()">
+              <label class="form-check-label">
+                <strong>Point relais</strong>
+                <span class="text-muted ms-2">Gratuit</span>
+              </label>
+            </div>
+          </div>
+          
+          <h4 class="fw-bold mb-3">
+            <i class="fas fa-credit-card me-2 text-primary"></i>Mode de paiement
+          </h4>
+          
+          <div class="payment-options">
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="radio" name="modePaiement" 
+                     value="LIVRAISON" [(ngModel)]="modePaiement">
+              <label class="form-check-label">
+                <strong>Paiement à la livraison</strong>
+                <span class="text-muted ms-2">Paiement en espèces à la réception</span>
+              </label>
+            </div>
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="radio" name="modePaiement" 
+                     value="ORANGE_MONEY" [(ngModel)]="modePaiement">
+              <label class="form-check-label">
+                <strong>Orange Money</strong>
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="modePaiement" 
+                     value="WAVE" [(ngModel)]="modePaiement">
+              <label class="form-check-label">
+                <strong>Wave</strong>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Récapitulatif de la commande -->
+      <div class="col-lg-5">
+        <div class="card border-0 shadow-sm rounded-4 p-4 sticky-cart">
+          <h4 class="fw-bold mb-4">
+            <i class="fas fa-shopping-cart me-2 text-primary"></i>Récapitulatif
+          </h4>
+          
+          <!-- Liste des produits -->
+          <div class="cart-items-list mb-3" style="max-height: 300px; overflow-y: auto;">
+            <div *ngFor="let item of cartItems; let i = index" class="cart-item mb-3 pb-3 border-bottom">
+              <div class="d-flex gap-3">
+                <img [src]="item.imageUrl || 'assets/placeholder.jpg'" class="cart-item-img">
+                <div class="flex-grow-1">
+                  <h6 class="mb-1">{{ item.nom }}</h6>
+                  <div class="small text-muted">
+                    <span *ngIf="item.taille">Taille: {{ item.taille }}</span>
+                    <span *ngIf="item.couleur"> | Couleur: {{ item.couleur }}</span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center mt-2">
+                    <div class="quantity-control">
+                      <button class="btn btn-sm btn-outline-secondary" (click)="modifierQuantite(i, -1)">-</button>
+                      <span class="mx-2">{{ item.quantite }}</span>
+                      <button class="btn btn-sm btn-outline-secondary" (click)="modifierQuantite(i, 1)">+</button>
+                    </div>
+                    <span class="fw-bold">{{ formatMoney(item.prix * item.quantite) }}</span>
+                    <button class="btn btn-sm btn-outline-danger" (click)="supprimerArticle(i)">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Totaux -->
+          <div class="totals mt-3">
+            <div class="d-flex justify-content-between mb-2">
+              <span>Sous-total</span>
+              <span class="fw-bold">{{ formatMoney(totalPanier) }}</span>
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+              <span>Livraison</span>
+              <span class="fw-bold">{{ fraisLivraison === 0 ? 'Gratuit' : formatMoney(fraisLivraison) }}</span>
+            </div>
+            <hr>
+            <div class="d-flex justify-content-between mb-3">
+              <span class="fs-5 fw-bold">Total</span>
+              <span class="fs-4 fw-bold text-primary">{{ formatMoney(totalCommande) }}</span>
+            </div>
+          </div>
+          
+          <!-- Message d'erreur -->
+          <div *ngIf="errorMessage" class="alert alert-danger">
+            {{ errorMessage }}
+          </div>
+          
+          <!-- Bouton validation -->
+          <button class="btn btn-primary w-100 py-3 fw-bold" 
+                  (click)="validerCommande()" 
+                  [disabled]="isLoading">
+            <i class="fas fa-check-circle me-2"></i>
+            {{ isLoading ? 'Traitement en cours...' : 'Confirmer ma commande' }}
+          </button>
+          
+          <div class="text-center mt-3">
+            <a routerLink="/panier" class="text-decoration-none">
+              <i class="fas fa-arrow-left me-1"></i>Retour au panier
+            </a>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+</div>

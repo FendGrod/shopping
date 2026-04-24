@@ -7,7 +7,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -79,6 +81,21 @@ public class ProduitController {
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body("Erreur: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/delete-all")
+    public ResponseEntity<Map<String, String>> deleteAll(@RequestBody List<Long> ids) {
+        try {
+            produitService.deleteAll(ids);
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Produits supprimés avec succès");
+            response.put("count", String.valueOf(ids.size()));
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, String> response = new HashMap<>();
+            response.put("error", e.getMessage());
+            return ResponseEntity.status(500).body(response);
         }
     }
 }

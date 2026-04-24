@@ -3,11 +3,17 @@ export interface Produit {
     nom: string;
     description: string;
     prix: number;
+    prixOriginal?: number;
     stock: number;
     imageUrl: string;
     categorie: string;
     sousCategorie: string;
     genre: string;
+    rating?: number;
+    isPromo?: boolean;
+    isNew?: boolean;
+    tailles?: string[];
+    couleurs?: string[];
     dateCreation?: Date;
 }
 

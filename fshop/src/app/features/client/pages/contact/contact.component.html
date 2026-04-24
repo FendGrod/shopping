@@ -1,0 +1,134 @@
+<app-header></app-header>
+
+<div class="contact-page">
+  
+  <!-- Hero section avec slider -->
+  <div class="hero-section">
+    <div id="heroSlider" class="carousel slide" data-bs-ride="carousel">
+      <div class="carousel-inner">
+        <div class="carousel-item" *ngFor="let img of backgroundImages; let i = index" [class.active]="i === currentImageIndex">
+          <div class="hero-bg" [style.backgroundImage]="'url(' + img + ')'"></div>
+        </div>
+      </div>
+      <div class="hero-overlay"></div>
+      <div class="container hero-content">
+        <h1>Contactez-nous</h1>
+        <p>Nous sommes à votre écoute. Réponse sous 24h.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container py-5">
+    <div class="row g-5">
+      
+      <!-- Informations de contact -->
+      <div class="col-md-5">
+        <div class="contact-info p-4 bg-light rounded-4">
+          <h3 class="fw-bold mb-4">Nos coordonnées</h3>
+          
+          <div class="info-item mb-4">
+            <div class="d-flex align-items-center mb-2">
+              <i class="fas fa-map-marker-alt fa-2x text-primary me-3"></i>
+              <h5 class="mb-0">Adresse</h5>
+            </div>
+            <p class="text-muted ms-5">Dakar, Sénégal<br>Rue 10, Zone B, Plateau</p>
+          </div>
+
+          <div class="info-item mb-4">
+            <div class="d-flex align-items-center mb-2">
+              <i class="fas fa-phone-alt fa-2x text-primary me-3"></i>
+              <h5 class="mb-0">Téléphone</h5>
+            </div>
+            <p class="text-muted ms-5">+221 77 123 45 67<br>+221 78 123 45 68</p>
+          </div>
+
+          <div class="info-item mb-4">
+            <div class="d-flex align-items-center mb-2">
+              <i class="fas fa-envelope fa-2x text-primary me-3"></i>
+              <h5 class="mb-0">Email</h5>
+            </div>
+            <p class="text-muted ms-5">contact&#64;fashionshop.sn<br>support&#64;fashionshop.sn</p>
+          </div>
+
+          <div class="info-item">
+            <div class="d-flex align-items-center mb-2">
+              <i class="fas fa-clock fa-2x text-primary me-3"></i>
+              <h5 class="mb-0">Horaires</h5>
+            </div>
+            <p class="text-muted ms-5">Lundi - Vendredi: 9h - 18h<br>Samedi: 10h - 14h</p>
+          </div>
+
+          <hr class="my-4">
+
+          <h5 class="mb-3">Suivez-nous</h5>
+          <div class="social-links">
+            <a href="#" class="btn btn-outline-primary rounded-circle me-2"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" class="btn btn-outline-primary rounded-circle me-2"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="btn btn-outline-primary rounded-circle me-2"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="btn btn-outline-primary rounded-circle"><i class="fab fa-linkedin-in"></i></a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Formulaire de contact -->
+      <div class="col-md-7">
+        <div class="contact-form p-4 shadow rounded-4">
+          <h3 class="fw-bold mb-4">Envoyez-nous un message</h3>
+          
+          <!-- Message de succès -->
+          <div *ngIf="submitted" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>Message envoyé ! Nous vous répondrons dans les plus brefs délais.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+
+          <!-- Message d'erreur -->
+          <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>{{ errorMessage }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+
+          <form (ngSubmit)="onSubmit()">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Nom complet *</label>
+                <input type="text" class="form-control" [(ngModel)]="contactInfo.nom" name="nom" required placeholder="Votre nom">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Email *</label>
+                <input type="email" class="form-control" [(ngModel)]="contactInfo.email" name="email" required placeholder="votre@email.com">
+              </div>
+              <div class="col-12">
+                <label class="form-label">Sujet *</label>
+                <input type="text" class="form-control" [(ngModel)]="contactInfo.sujet" name="sujet" required placeholder="Objet de votre message">
+              </div>
+              <div class="col-12">
+                <label class="form-label">Message *</label>
+                <textarea class="form-control" rows="5" [(ngModel)]="contactInfo.message" name="message" required placeholder="Votre message..."></textarea>
+              </div>
+              <div class="col-12">
+                <button type="submit" class="btn btn-primary px-5 py-2" [disabled]="isLoading">
+                  <i class="fas fa-paper-plane me-2"></i>{{ isLoading ? 'Envoi en cours...' : 'Envoyer' }}
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Carte Google Maps -->
+    <div class="map-section mt-5">
+      <h3 class="fw-bold mb-4 text-center">Notre localisation</h3>
+      <div class="map-container rounded-4 overflow-hidden shadow">
+        <iframe 
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d61762.34855429406!2d-17.480175!3d14.693425!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xec1726c3c2e4c2f%3A0x4c2e5b5c5e5e5e5e!2sDakar%2C%20Senegal!5e0!3m2!1sfr!2s!4v1700000000000!5m2!1sfr!2s" 
+          width="100%" 
+          height="300" 
+          style="border:0;" 
+          allowfullscreen="" 
+          loading="lazy">
+        </iframe>
+      </div>
+    </div>
+  </div>
+</div>

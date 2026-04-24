@@ -89,6 +89,7 @@ export class ConnexionComponent implements OnInit {
   }
 
   // ⭐ MODIFICATION ICI : Redirige vers la bonne page selon le rôle ⭐
+                        
 handleGoogleLogin(response: any) {
   console.log('Réponse Google reçue');
   const payload = this.decodeJwt(response.credential);

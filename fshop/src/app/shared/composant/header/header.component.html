@@ -20,12 +20,12 @@
             Chaussures
           </a>
           <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="/chaussures?category=homme">Chaussures Homme</a></li>
-            <li><a class="dropdown-item" href="/chaussures?category=femme">Chaussures Femme</a></li>
-            <li><a class="dropdown-item" href="/chaussures?category=enfant">Chaussures Enfant</a></li>
-            <li><a class="dropdown-item" href="/chaussures?category=sport">Chaussures Sport</a></li>
+            <li><a class="dropdown-item" [routerLink]="['/produits']" [queryParams]="{categorie: 'CHAUSSURES', sousCategorie: 'Homme'}">Chaussures Homme</a></li>
+            <li><a class="dropdown-item" [routerLink]="['/produits']" [queryParams]="{categorie: 'CHAUSSURES', sousCategorie: 'Femme'}">Chaussures Femme</a></li>
+            <li><a class="dropdown-item" [routerLink]="['/produits']" [queryParams]="{categorie: 'CHAUSSURES', sousCategorie: 'Enfant'}">Chaussures Enfant</a></li>
+            <li><a class="dropdown-item" [routerLink]="['/produits']" [queryParams]="{categorie: 'CHAUSSURES', sousCategorie: 'Sport'}">Chaussures Sport</a></li>
             <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="/chaussures">Toutes les chaussures</a></li>
+            <li><a class="dropdown-item" [routerLink]="['/produits']" [queryParams]="{categorie: 'CHAUSSURES'}">Toutes les chaussures</a></li>
           </ul>
         </li>
 
@@ -35,11 +35,11 @@
             Vêtements
           </a>
           <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="#">Hauts</a></li>
-            <li><a class="dropdown-item" href="#">Bas</a></li>
-            <li><a class="dropdown-item" href="#">Sous-vêtements</a></li>
+            <li><a class="dropdown-item" [routerLink]="['/produits']" [queryParams]="{categorie: 'VETEMENTS', sousCategorie: 'Hauts'}">Hauts</a></li>
+            <li><a class="dropdown-item" [routerLink]="['/produits']" [queryParams]="{categorie: 'VETEMENTS', sousCategorie: 'Bas'}">Bas</a></li>
+            <li><a class="dropdown-item" [routerLink]="['/produits']" [queryParams]="{categorie: 'VETEMENTS', sousCategorie: 'Sous-vêtements'}">Sous-vêtements</a></li>
             <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="#">Tous les vêtements</a></li>
+            <li><a class="dropdown-item" [routerLink]="['/produits']" [queryParams]="{categorie: 'VETEMENTS'}">Tous les vêtements</a></li>
           </ul>
         </li>
 
@@ -49,11 +49,11 @@
             Accessoires
           </a>
           <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="#">Sacs</a></li>
-            <li><a class="dropdown-item" href="#">Ceintures</a></li>
-            <li><a class="dropdown-item" href="#">Chapeaux</a></li>
+            <li><a class="dropdown-item" [routerLink]="['/produits']" [queryParams]="{categorie: 'ACCESSOIRES', sousCategorie: 'Sacs'}">Sacs</a></li>
+            <li><a class="dropdown-item" [routerLink]="['/produits']" [queryParams]="{categorie: 'ACCESSOIRES', sousCategorie: 'Ceintures'}">Ceintures</a></li>
+            <li><a class="dropdown-item" [routerLink]="['/produits']" [queryParams]="{categorie: 'ACCESSOIRES', sousCategorie: 'Chapeaux'}">Chapeaux</a></li>
             <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="#">Tous les accessoires</a></li>
+            <li><a class="dropdown-item" [routerLink]="['/produits']" [queryParams]="{categorie: 'ACCESSOIRES'}">Tous les accessoires</a></li>
           </ul>
         </li>
 
@@ -63,22 +63,34 @@
             Sport
           </a>
           <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="#">Running</a></li>
-            <li><a class="dropdown-item" href="#">Fitness</a></li>
-            <li><a class="dropdown-item" href="#">Football</a></li>
+            <li><a class="dropdown-item" [routerLink]="['/produits']" [queryParams]="{categorie: 'SPORT', sousCategorie: 'Running'}">Running</a></li>
+            <li><a class="dropdown-item" [routerLink]="['/produits']" [queryParams]="{categorie: 'SPORT', sousCategorie: 'Fitness'}">Fitness</a></li>
+            <li><a class="dropdown-item" [routerLink]="['/produits']" [queryParams]="{categorie: 'SPORT', sousCategorie: 'Football'}">Football</a></li>
             <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="#">Tout l'équipement</a></li>
+            <li><a class="dropdown-item" [routerLink]="['/produits']" [queryParams]="{categorie: 'SPORT'}">Tout l'équipement</a></li>
           </ul>
         </li>
 
       </ul>
 
-      <!-- Icônes droite + Bouton déconnexion -->
+      <!-- Icônes droite -->
       <div class="d-flex gap-3 align-items-center">
         <i class="fas fa-search text-dark fs-5" style="cursor: pointer;"></i>
-        <div class="position-relative" style="cursor: pointer;">
+        
+        <!-- 💬 ICÔNE MESSAGES AVEC COMPTEUR -->
+        <div *ngIf="isLoggedIn()" class="position-relative" style="cursor: pointer;" (click)="openMessages()">
+          <i class="fas fa-envelope text-dark fs-5"></i>
+          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary" *ngIf="nonRepondusCount > 0">
+            {{ nonRepondusCount }}
+          </span>
+        </div>
+        
+        <!-- 🛒 ICÔNE PANIER AVEC COMPTEUR -->
+        <div class="position-relative" style="cursor: pointer;" (click)="openCartModal()">
           <i class="fas fa-shopping-cart text-dark fs-5"></i>
-          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{ cartCount }}</span>
+          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" *ngIf="cartCount > 0">
+            {{ cartCount }}
+          </span>
         </div>
         
         <!-- Affichage utilisateur connecté -->
@@ -89,7 +101,11 @@
           </button>
           <ul class="dropdown-menu dropdown-menu-end">
             <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>Mon profil</a></li>
-            <li><a class="dropdown-item" href="#"><i class="fas fa-shopping-bag me-2"></i>Mes commandes</a></li>
+            <li><a class="dropdown-item" routerLink="/mes-commandes"><i class="fas fa-shopping-bag me-2"></i>Mes commandes</a></li>
+            <li><a class="dropdown-item" (click)="openMessages()" style="cursor: pointer;">
+              <i class="fas fa-envelope me-2"></i>Mes messages
+              <span *ngIf="nonRepondusCount > 0" class="badge bg-danger ms-2">{{ nonRepondusCount }}</span>
+            </a></li>
             <li><hr class="dropdown-divider"></li>
             <li><a class="dropdown-item text-danger" (click)="logout()" style="cursor: pointer;">
               <i class="fas fa-sign-out-alt me-2"></i>Déconnexion
@@ -105,3 +121,158 @@
     </div>
   </div>
 </nav>
+
+<!-- MODAL PANIER -->
+<div class="modal fade" id="cartModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fas fa-shopping-cart me-2"></i>Mon panier
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        
+        <!-- Panier vide -->
+        <div *ngIf="cartItems.length === 0" class="text-center py-5">
+          <i class="fas fa-shopping-cart fa-4x text-muted mb-3"></i>
+          <h5>Votre panier est vide</h5>
+          <p class="text-muted">Ajoutez des produits depuis notre boutique</p>
+          <button class="btn btn-primary" data-bs-dismiss="modal" routerLink="/produits">
+            <i class="fas fa-store me-2"></i>Découvrir nos produits
+          </button>
+        </div>
+
+        <!-- Panier avec articles -->
+        <div *ngIf="cartItems.length > 0">
+          <div class="cart-items">
+            <div *ngFor="let item of cartItems; let i = index" class="cart-item">
+              <img [src]="item.imageUrl || 'assets/placeholder.jpg'" alt="product" class="cart-item-img">
+              <div class="cart-item-details">
+                <h6 class="mb-1">{{ item.nom }}</h6>
+                <div class="cart-item-meta">
+                  <small class="text-muted" *ngIf="item.taille">Taille: {{ item.taille }}</small>
+                  <small class="text-muted" *ngIf="item.couleur">Couleur: {{ item.couleur }}</small>
+                  <small class="text-danger" *ngIf="item.stock < item.quantite">
+                    <i class="fas fa-exclamation-triangle"></i> Stock: {{ item.stock }}
+                  </small>
+                </div>
+                <div class="cart-item-price">{{ formatMoney(item.prix) }}</div>
+              </div>
+              <div class="cart-item-actions">
+                <div class="quantity-control">
+                  <button class="btn btn-sm btn-outline-secondary" 
+                          (click)="updateQuantity(i, item.quantite - 1)" 
+                          [disabled]="item.quantite <= 1">-</button>
+                  <input type="number" 
+                         class="quantity-input" 
+                         [(ngModel)]="item.quantite" 
+                         (change)="updateQuantityInput(i, $event)"
+                         min="1" 
+                         [max]="item.stock"
+                         [disabled]="item.stock === 0">
+                  <button class="btn btn-sm btn-outline-secondary" 
+                          (click)="updateQuantity(i, item.quantite + 1)" 
+                          [disabled]="item.quantite >= item.stock || item.stock === 0">+</button>
+                </div>
+                <button class="btn btn-sm btn-outline-danger ms-2" (click)="removeFromCart(i)">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="cart-footer mt-4">
+            <div class="cart-total">
+              <strong>Total :</strong>
+              <span class="total-amount">{{ formatMoney(totalPanier) }}</span>
+            </div>
+            <div class="cart-actions mt-3 d-flex justify-content-between">
+              <button class="btn btn-outline-danger" (click)="clearCart()">
+                <i class="fas fa-trash-alt me-2"></i>Vider le panier
+              </button>
+              <button class="btn btn-success" (click)="checkout()" [disabled]="panierInvalide()">
+                <i class="fas fa-check-circle me-2"></i>Passer commande
+              </button>
+            </div>
+            <div *ngIf="panierInvalide()" class="alert alert-warning mt-3 mb-0 small">
+              <i class="fas fa-exclamation-triangle me-2"></i>
+              Certains produits dépassent la quantité disponible. Veuillez ajuster votre panier.
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL MESSAGES CLIENT -->
+<div class="modal fade" id="messagesModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content" style="height: 70vh;">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fas fa-envelope me-2"></i>Mes messages</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-0">
+        <div class="row g-0 h-100">
+          
+          <!-- Liste des messages -->
+          <div class="col-md-5 border-end">
+            <div class="message-list-client">
+              <div *ngFor="let msg of messages" class="message-item" [class.active]="selectedMessage?.id === msg.id" (click)="openConversation(msg)">
+                <div class="message-avatar">
+                  <i class="fas fa-user-circle fa-2x text-secondary"></i>
+                </div>
+                <div class="message-info">
+                  <div class="message-sujet">{{ msg.sujet }}</div>
+                  <div class="message-extrait">{{ msg.contenu | slice:0:50 }}...</div>
+                  <div class="message-status mt-1">
+                    <span class="badge" [ngClass]="msg.estRepondu ? 'bg-success' : 'bg-warning text-dark'">
+                      {{ msg.estRepondu ? 'Répondu' : 'En attente' }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div *ngIf="messages.length === 0" class="text-center p-4 text-muted">
+                <i class="fas fa-inbox fa-3x mb-2"></i>
+                <p>Aucun message</p>
+                <button class="btn btn-primary btn-sm" routerLink="/contact">Envoyer un message</button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Détail du message -->
+          <div class="col-md-7">
+            <div *ngIf="selectedMessage" class="message-detail">
+              <div class="detail-header">
+                <h6>{{ selectedMessage.sujet }}</h6>
+                <small class="text-muted">{{ formatDate(selectedMessage.dateEnvoi) }}</small>
+              </div>
+              <div class="detail-body">
+                <div class="client-message">
+                  <strong>Votre message :</strong>
+                  <p class="mt-2">{{ selectedMessage.contenu }}</p>
+                </div>
+                <div *ngIf="selectedMessage.estRepondu" class="admin-response mt-3">
+                  <strong><i class="fas fa-reply-all text-primary me-1"></i>Réponse :</strong>
+                  <div class="response-text mt-2">{{ selectedMessage.reponse }}</div>
+                  <small class="text-muted mt-1 d-block">{{ formatDate(selectedMessage.dateReponse) }}</small>
+                </div>
+                <div *ngIf="!selectedMessage.estRepondu" class="alert alert-info mt-3">
+                  <i class="fas fa-clock me-2"></i>En attente de réponse...
+                </div>
+              </div>
+            </div>
+            <div *ngIf="!selectedMessage" class="no-message">
+              <i class="fas fa-envelope-open-text fa-4x text-muted mb-3"></i>
+              <p>Sélectionnez un message pour voir les détails</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

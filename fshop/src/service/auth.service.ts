@@ -96,6 +96,11 @@ isLoggedIn(): boolean {
 
 // Récupérer l'utilisateur
 getCurrentUser(): Utilisateur | null {
+  // Lis directement depuis localStorage pour éviter les problèmes de synchronisation
+  const saved = localStorage.getItem('currentUser');
+  if (saved) {
+    return JSON.parse(saved);
+  }
   return this.currentUser;
 }
 }

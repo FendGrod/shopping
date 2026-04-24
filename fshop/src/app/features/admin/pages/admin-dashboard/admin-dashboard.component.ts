@@ -15,23 +15,22 @@ Chart.register(...registerables);
 export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('salesCanvas') salesCanvas!: ElementRef<HTMLCanvasElement>;
   private chartInstance: Chart | null = null;
+  private refreshInterval: any;
 
   stats: DashboardStats = { users: 0, products: 0, orders: 0, revenue: 0 };
   activities: Activity[] = [];
   topProducts: any[] = [];
-  private refreshInterval: any;
+  categorySalesStats: { name: string; percentage: number; color: string }[] = [];
 
   constructor(private dashboardService: DashboardService) {}
 
   ngOnInit() {
-    this.loadStats();
-    this.loadActivities();
-    this.loadTopProducts();
-    this.refreshInterval = setInterval(() => this.loadActivities(), 10000);
+    this.loadAllData();
+    this.refreshInterval = setInterval(() => this.loadAllData(), 30000);
   }
 
   ngAfterViewInit() {
-    this.loadSalesChart();
+    setTimeout(() => this.loadSalesChart(), 500);
   }
 
   ngOnDestroy() {
@@ -39,16 +38,36 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
     if (this.chartInstance) this.chartInstance.destroy();
   }
 
+  loadAllData() {
+    this.loadStats();
+    this.loadActivities();
+    this.loadTopProducts();
+    this.loadCategorySalesStats();
+    this.loadSalesChart();
+  }
+
   loadStats() {
-    this.dashboardService.getStats().subscribe(data => this.stats = data);
+    this.dashboardService.getStats().subscribe(data => {
+      this.stats = data;
+    });
   }
 
   loadActivities() {
-    this.dashboardService.getRecentActivities().subscribe(data => this.activities = data);
+    this.dashboardService.getRecentActivities().subscribe(data => {
+      this.activities = data;
+    });
   }
 
   loadTopProducts() {
-    this.dashboardService.getTopProducts().subscribe(data => this.topProducts = data);
+    this.dashboardService.getTopProducts().subscribe(data => {
+      this.topProducts = data;
+    });
+  }
+
+  loadCategorySalesStats() {
+    this.dashboardService.getCategorySalesStats().subscribe(data => {
+      this.categorySalesStats = data;
+    });
   }
 
   loadSalesChart() {
@@ -89,14 +108,17 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
           legend: { position: 'top' },
           tooltip: {
             callbacks: {
-              label: (context) => `${context.raw} FCFA`
+              label: (context: any) => {
+                const value = context.raw as number;
+                return `${value.toLocaleString()} FCFA`;
+              }
             }
           }
         },
         scales: {
           y: {
             ticks: {
-              callback: (value) => value + ' FCFA'
+              callback: (value: any) => Number(value).toLocaleString() + ' FCFA'
             }
           }
         }
